@@ -148,6 +148,7 @@
 
 <div class="container">
   <h2>MLB Guess 5</h2>
+  <p>The goal of this game is to guess the top-5 in the category below.</p>
   
 
   <h3 id="gameTitle">Loading...</h3>
@@ -185,6 +186,14 @@ const GAMES = [
   },
 
   {
+    title: "Most Home Runs in 2021",
+    stats: "season",
+    group: "hitting",
+    sortStat: "homeRuns",
+    season: 2021
+  },
+
+  {
     title: "Most Career Home Runs All-Time",
     stats: "career",
     group: "hitting",
@@ -203,15 +212,6 @@ const GAMES = [
     stats: "byDateRange",
     group: "hitting",
     sortStat: "doubles",
-    startDate: "2020-01-01",
-    endDate: "2026-12-31"
-  },
-
-  {
-    title: "Most Strikeouts Since 2020",
-    stats: "byDateRange",
-    group: "pitching",
-    sortStat: "strikeOuts",
     startDate: "2020-01-01",
     endDate: "2026-12-31"
   },
