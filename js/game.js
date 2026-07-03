@@ -338,9 +338,6 @@ function checkWin() {
   }
 }
 
-function openPopup() {
-  document.getElementById("winPopup").style.display = "flex";
-}
 
 function closePopup() {
   document.getElementById("winPopup").style.display = "none";
