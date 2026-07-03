@@ -346,12 +346,92 @@ function closePopup() {
   document.getElementById("winPopup").style.display = "none";
 }
 
+
 function shareResults() {
-  alert("share button clicked");
+  let green = 0;
+  let yellow = 0;
+  let red = 0;
+  let gray = 0;
+
+  guesses.forEach(g => {
+    const rank = g.rank;
+
+    if (typeof rank !== "number") {
+      gray++;
+    } else if (rank <= 5) {
+      green++;
+    } else if (rank <= 10) {
+      yellow++;
+    } else {
+      red++;
+    }
+  });
+
+  const text =
+`MLB Guess 5
+🟢 ${green}
+🟡 ${yellow}
+🔴 ${red}
+⚫ ${gray}
+Game: ${GAME.title}`;
+
+  navigator.clipboard.writeText(text)
+    .then(() => {
+      alert("Copied to clipboard!");
+    })
+    .catch(() => {
+      alert("Copy failed");
+    });
 }
 
 function showStats() {
   alert("stats button clicked");
+}
+
+function openPopup() {
+  const popup = document.getElementById("winPopup");
+  const scoreStats = document.getElementById("scoreStats");
+
+  let green = 0;
+  let yellow = 0;
+  let red = 0;
+  let gray = 0;
+
+  guesses.forEach(g => {
+    const rank = g.rank;
+
+    if (typeof rank !== "number") {
+      gray++;
+    } else if (rank <= 5) {
+      green++;
+    } else if (rank <= 10) {
+      yellow++;
+    } else if (rank <= 25) {
+      red++;
+    } else {
+      gray++;
+    }
+  });
+
+  scoreStats.innerHTML = `
+    <div class="score-row">
+      <span class="dot green"></span> ${green}
+    </div>
+
+    <div class="score-row">
+      <span class="dot yellow"></span> ${yellow}
+    </div>
+
+    <div class="score-row">
+      <span class="dot red"></span> ${red}
+    </div>
+
+    <div class="score-row">
+      <span class="dot gray"></span> ${gray}
+    </div>
+  `;
+
+  popup.style.display = "flex";
 }
 
 loadLeaderboard();
