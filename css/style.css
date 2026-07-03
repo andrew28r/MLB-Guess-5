@@ -1,189 +1,213 @@
 body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
 
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
-      min-height: 100vh;   /* important */
-      padding-top: 60px;
-    }
+  min-height: 100vh;
+  padding-top: 60px;
+}
 
-    .container {
-      width: 100%;
-      max-width: 500px;
-      padding: 0 15px;
-      box-sizing: border-box;
-      text-align: center;
-      position: relative;
-    }
+/* ---------- Layout ---------- */
 
-    .input-wrapper {
-      position: relative;
-      width: 100%;
-    }
+.container {
+  width: 100%;
+  max-width: 500px;
+  padding: 0 15px;
+  box-sizing: border-box;
+  text-align: center;
+  position: relative;
+}
 
-    input {
-      width: 100%;
-      padding: 14px;
-      font-size: 16px;
-      border-radius: 10px;
-      border: 2px solid #ccc;
-      box-sizing: border-box;
-      outline: none;
-    }
+.input-wrapper {
+  position: relative;
+  width: 100%;
+}
 
-    input {
-      width: 100%;
-      padding: 14px;
-      font-size: 16px; /* prevents iPhone zooming */
-    }
+.board {
+  margin-top: 20px;
+  text-align: left;
+}
 
-    input:focus {
-      border-color: #007bff;
-      box-shadow: 0 0 8px rgba(0,123,255,0.3);
-    }
+.footer {
+  margin-top: auto;
+  padding: 10px;
+  text-align: center;
+  font-size: 13px;
+  color: #777;
+}
 
-    .guess-counter {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 6px;
-      text-align: left;
-    }
+/* ---------- Input ---------- */
 
-    .message {
-      margin-top: 6px;
-      font-size: 13px;
-      color: #d93025;
-      text-align: left;
-      min-height: 18px;
-    }
+input {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px; /* prevents iPhone zoom */
+  border-radius: 10px;
+  border: 2px solid #ccc;
+  box-sizing: border-box;
+  outline: none;
+}
 
-    .dropdown {
-      position: absolute;
-      top: calc(100% + 6px);
-      left: 0;
-      width: 100%;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-      max-height: 240px;
-      overflow-y: auto;
-      display: none;
-      z-index: 9999;
-      text-align: left;
-    }
+input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 8px rgba(0,123,255,0.3);
+}
 
-    .item {
-      padding: 12px;
-      cursor: pointer;
-      border-bottom: 1px solid #eee;
-    }
+/* ---------- Text ---------- */
 
-    .item:hover {
-      background: #f0f6ff;
-    }
+.guess-counter {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 6px;
+  text-align: left;
+}
 
-    .item.active {
-      background: #dbe9ff;
-    }
+.message {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #d93025;
+  text-align: left;
+  min-height: 18px;
+}
 
-    .board {
-      margin-top: 20px;
-      text-align: left;
-    }
+#gameTitle {
+  margin: 5px 0 15px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
 
-    .row {
-      margin-bottom: 8px;
-      padding: 10px;
-      border-radius: 8px;
-      display: flex;
-      justify-content: space-between;
-      box-shadow: 0 2px 3px rgba(0,0,0,0.1);
-      font-weight: 500;
-      background: white;
-      transition: 0.2s;
-    }
+/* ---------- Dropdown ---------- */
 
-    .rowGuess {
-      margin-bottom: 8px;
-      padding: 10px;
-      border-radius: 8px;
-      display: flex;
-      justify-content: space-between;
-      /*box-shadow: 0 2px 3px rgba(0,0,0,0.1);*/
-      font-weight: 500;
-      background: white;
-      transition: 0.2s;
-      border: 2px solid #3f3f3f;
-    }
+.dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
 
-    #gameTitle {
-      margin: 5px 0 15px;
-      font-size: 16px;
-      font-weight: 600;
-      color: #333;
-    }
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 
-    .footer {
-      margin-top: auto;   /* pushes footer to bottom */
-      padding: 10px;
-      text-align: center;
-      font-size: 13px;
-      color: #777;
-    }
+  max-height: 240px;
+  overflow-y: auto;
 
-    .rank { width: 40px; font-weight: bold; }
-    .name { flex: 1; }
-    .value { font-weight: bold; }
+  display: none;
+  z-index: 9999;
 
-    .top5 { background: #d4edda; }
-    .top10 { background: #fff3cd; }
-    .top25 { background: #f8d7da; }
-    .ranked { background: #e2e3e5; }
-    .other { background: #c6c7c9; }
+  text-align: left;
+}
 
-    .popup {
-      position: fixed;
-      top: 0;
-      left: 0;
+.item {
+  padding: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
 
-      width: 100%;
-      height: 100%;
+.item:hover {
+  background: #f0f6ff;
+}
 
-      background: rgba(0,0,0,0.7);
+.item.active {
+  background: #dbe9ff;
+}
 
-      display: none;
+/* ---------- Rows ---------- */
 
-      justify-content: center;
-      align-items: center;
+.row,
+.rowGuess {
+  margin-bottom: 8px;
+  padding: 10px;
+  border-radius: 8px;
 
-      z-index: 99999;
-    }
+  display: flex;
+  justify-content: space-between;
 
-    .popup-content {
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
+  font-weight: 500;
+  background: white;
+}
 
-      width: 90%;
-      max-width: 400px;
+.row {
+  box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+  transition: 0.2s;
+}
 
-      text-align: center;
-    }
+.rowGuess {
+  border: 2px solid #3f3f3f;
+}
 
-    .popup-content button {
-      display: block;
-      width: 100%;
+/* ---------- Columns ---------- */
 
-      margin-top: 10px;
-      padding: 12px;
+.rank {
+  width: 40px;
+  font-weight: bold;
+}
 
-      border: none;
-      border-radius: 8px;
+.name {
+  flex: 1;
+}
 
-      cursor: pointer;
-      font-size: 16px;
-    }
+.value {
+  font-weight: bold;
+}
+
+/* ---------- Rank Colors ---------- */
+
+.top5 { background: #d4edda; }
+.top10 { background: #fff3cd; }
+.top25 { background: #f8d7da; }
+.ranked { background: #e2e3e5; }
+.other { background: #c6c7c9; }
+
+/* ---------- Popup ---------- */
+
+.popup {
+  position: fixed;
+  inset: 0;
+
+  background: rgba(0,0,0,0.7);
+
+  display: none;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 99999;
+}
+
+.popup-content {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+
+  width: 90%;
+  max-width: 400px;
+
+  text-align: center;
+}
+
+.popup-content button {
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* ---------- Buttons ---------- */
+
+button {
+  background: #007bff;
+  color: white;
+
+  border: none;
+  padding: 12px 20px;
+  font-size: 16px;
+
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0056b3;
+}
