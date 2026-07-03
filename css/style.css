@@ -1,52 +1,42 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: #f4f4f4;
+  background: #e9ecef;
 
   display: flex;
   flex-direction: column;
   align-items: center;
 
   min-height: 100vh;
-  padding-top: 60px;
+  padding-top: 50px;
+
+  -webkit-text-size-adjust: 100%;
 }
 
-/* ---------- Layout ---------- */
+/* ---------- Container ---------- */
 
 .container {
   width: 100%;
   max-width: 500px;
-  padding: 0 15px;
+  padding: 0 12px;
   box-sizing: border-box;
   text-align: center;
   position: relative;
 }
+
+/* ---------- Input ---------- */
 
 .input-wrapper {
   position: relative;
   width: 100%;
 }
 
-.board {
-  margin-top: 20px;
-  text-align: left;
-}
-
-.footer {
-  margin-top: auto;
-  padding: 10px;
-  text-align: center;
-  font-size: 13px;
-  color: #777;
-}
-
-/* ---------- Input ---------- */
-
 input {
   width: 100%;
   padding: 14px;
-  font-size: 16px; /* prevents iPhone zoom */
-  border-radius: 10px;
+  font-size: 16px; /* iPhone zoom fix */
+
+  border-radius: 12px;
   border: 2px solid #ccc;
   box-sizing: border-box;
   outline: none;
@@ -54,7 +44,7 @@ input {
 
 input:focus {
   border-color: #007bff;
-  box-shadow: 0 0 8px rgba(0,123,255,0.3);
+  box-shadow: 0 0 8px rgba(0,123,255,0.25);
 }
 
 /* ---------- Text ---------- */
@@ -75,7 +65,7 @@ input:focus {
 }
 
 #gameTitle {
-  margin: 5px 0 15px;
+  margin: 10px 0 15px;
   font-size: 16px;
   font-weight: 600;
   color: #333;
@@ -90,7 +80,7 @@ input:focus {
   width: 100%;
 
   background: white;
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 
   max-height: 240px;
@@ -100,6 +90,8 @@ input:focus {
   z-index: 9999;
 
   text-align: left;
+
+  -webkit-overflow-scrolling: touch;
 }
 
 .item {
@@ -116,13 +108,18 @@ input:focus {
   background: #dbe9ff;
 }
 
-/* ---------- Rows ---------- */
+/* ---------- Board ---------- */
+
+.board {
+  margin-top: 20px;
+  text-align: left;
+}
 
 .row,
 .rowGuess {
   margin-bottom: 8px;
   padding: 10px;
-  border-radius: 8px;
+  border-radius: 12px;
 
   display: flex;
   justify-content: space-between;
@@ -132,8 +129,7 @@ input:focus {
 }
 
 .row {
-  box-shadow: 0 2px 3px rgba(0,0,0,0.1);
-  transition: 0.2s;
+  box-shadow: 0 2px 3px rgba(0,0,0,0.08);
 }
 
 .rowGuess {
@@ -142,26 +138,37 @@ input:focus {
 
 /* ---------- Columns ---------- */
 
-.rank {
-  width: 40px;
-  font-weight: bold;
-}
+.rank { width: 40px; font-weight: bold; }
+.name { flex: 1; }
+.value { font-weight: bold; }
 
-.name {
-  flex: 1;
-}
-
-.value {
-  font-weight: bold;
-}
-
-/* ---------- Rank Colors ---------- */
+/* ---------- Colors ---------- */
 
 .top5 { background: #d4edda; }
 .top10 { background: #fff3cd; }
 .top25 { background: #f8d7da; }
 .ranked { background: #e2e3e5; }
 .other { background: #c6c7c9; }
+
+/* ---------- Buttons ---------- */
+
+button {
+  background: #007bff;
+  color: white;
+
+  border: none;
+  padding: 14px 18px;
+  font-size: 16px;
+
+  border-radius: 12px;
+  cursor: pointer;
+
+  min-height: 44px; /* iPhone touch target */
+}
+
+button:hover {
+  background: #0056b3;
+}
 
 /* ---------- Popup ---------- */
 
@@ -180,8 +187,8 @@ input:focus {
 
 .popup-content {
   background: white;
-  padding: 30px;
-  border-radius: 15px;
+  padding: 25px;
+  border-radius: 16px;
 
   width: 90%;
   max-width: 400px;
@@ -189,25 +196,24 @@ input:focus {
   text-align: center;
 }
 
-.popup-content button {
-  width: 100%;
-  margin-top: 10px;
-}
+/* ---------- Mobile tweaks ---------- */
 
-/* ---------- Buttons ---------- */
+@media (max-width: 480px) {
+  .container {
+    padding: 0 10px;
+  }
 
-button {
-  background: #007bff;
-  color: white;
+  h2 {
+    font-size: 20px;
+  }
 
-  border: none;
-  padding: 12px 20px;
-  font-size: 16px;
+  #gameTitle {
+    font-size: 14px;
+  }
 
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #0056b3;
+  .row,
+  .rowGuess {
+    font-size: 14px;
+    padding: 8px;
+  }
 }
