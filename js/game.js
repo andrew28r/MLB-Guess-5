@@ -73,6 +73,15 @@ function getDailyGame() {
   return GAMES[index];
 }
 
+function loadGame() {
+  const saved = localStorage.getItem("mlb-guesses");
+
+  if (saved) {
+    guesses = JSON.parse(saved);
+  }
+}
+
+
 const GAME = getDailyGame();
 
 let leaderboard = [];
@@ -80,6 +89,9 @@ let guesses = [];
 let matches = [];
 let activeIndex = -1;
 let searchTimeout = null;
+
+
+loadGame();
 
 async function loadLeaderboard() {
 
@@ -118,8 +130,12 @@ async function loadLeaderboard() {
     name: p.player.fullName,
     value: Number(p.stat[GAME.sortStat] || 0)
   }));
-
+    
   gameTitle.textContent = GAME.title;
+
+  render();
+  renderLastGuess();
+  guessCounter.textContent = `Guesses: ${guesses.length}`;
 }
 
 async function searchPlayers(query) {
@@ -241,6 +257,7 @@ function guessPlayer() {
 
   input.value = "";
   dropdown.style.display = "none";
+  saveGame();
 }
 
 function renderLastGuess() {
@@ -430,5 +447,24 @@ function openPopup() {
 
   popup.style.display = "flex";
 }
+
+
+function saveGame() {
+  localStorage.setItem("mlb-guesses", JSON.stringify(guesses));
+}
+
+function resetIfNewDay() {
+  const lastDate = localStorage.getItem("mlb-date");
+
+  const today = new Date().toDateString();
+
+  if (lastDate !== today) {
+    localStorage.setItem("mlb-date", today);
+    localStorage.removeItem("mlb-guesses");
+    localStorage.removeItem("mlb-win");
+  }
+}
+
+resetIfNewDay();
 
 loadLeaderboard();
