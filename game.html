@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MLB Guess 5</title>
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/game.js" defer></script>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>MLB Guess 5</h2>
+  <p>The goal of this game is to guess the top-5 in the category below.</p>
+
+  <h3 id="gameTitle">Loading...</h3>
+
+  <div class="input-wrapper">
+    <div id="guessCounter" class="guess-counter">Guesses: 0</div>
+
+    <input id="search" placeholder="Guess a player..." autocomplete="off">
+    <div id="dropdown" class="dropdown"></div>
+
+    <div id="message" class="message"></div>
+  </div>
+
+  <div id="lastGuess" class="board"></div>
+  <div id="board" class="board"></div>
+</div>
+
+<div id="winPopup" class="popup">
+  <div class="popup-content">
+    <h2>You Win!</h2>
+    <p>You found the Top 5 players!</p>
+
+    <button onclick="shareResults()">Share Results</button>
+    <button onclick="showStats()">Stats</button>
+    <button onclick="closePopup()">Close</button>
+  </div>
+</div>
+
+</body>
+</html>
