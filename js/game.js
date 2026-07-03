@@ -398,9 +398,6 @@ Game: ${GAME.title}`;
     });
 }
 
-function showStats() {
-  alert("stats button clicked");
-}
 
 function openPopup() {
   const popup = document.getElementById("winPopup");
