@@ -374,10 +374,12 @@ function shareResults() {
       gray++;
     } else if (rank <= 5) {
       green++;
-    } else if (rank <= 10) {
+    } else if (rank <= 10 && rank > 5) {
       yellow++;
-    } else {
+    } else if (rank <=25 && rank > 10) {
       red++;
+    } else {
+      gray++;
     }
   });
 
@@ -398,7 +400,6 @@ Game: ${GAME.title}`;
     });
 }
 
-
 function openPopup() {
   const popup = document.getElementById("winPopup");
   const scoreStats = document.getElementById("scoreStats");
@@ -415,9 +416,9 @@ function openPopup() {
       gray++;
     } else if (rank <= 5) {
       green++;
-    } else if (rank <= 10) {
+    } else if (rank <= 10 && rank > 5) {
       yellow++;
-    } else if (rank <= 25) {
+    } else if (rank <=25 && rank > 10) {
       red++;
     } else {
       gray++;
