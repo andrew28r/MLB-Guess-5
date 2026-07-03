@@ -134,7 +134,7 @@ async function loadLeaderboard() {
   gameTitle.textContent = GAME.title;
 
   render();
-  renderLastGuess();
+  lastGuess.innerHTML = "";
   guessCounter.textContent = `Guesses: ${guesses.length}`;
 }
 
