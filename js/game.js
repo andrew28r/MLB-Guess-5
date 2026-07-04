@@ -58,15 +58,7 @@ const GAMES = [
 ];
 
 function getDailyGame() {
-  const today = new Date();
-
-  const dayNumber = Math.floor(
-    Date.UTC(
-      today.getUTCFullYear(),
-      today.getUTCMonth(),
-      today.getUTCDate()
-    ) / 86400000
-  );
+  const dayNumber = getEasternDayNumber();
 
   const index = dayNumber % GAMES.length;
 
@@ -90,8 +82,6 @@ let matches = [];
 let activeIndex = -1;
 let searchTimeout = null;
 
-
-loadGame();
 
 async function loadLeaderboard() {
 
@@ -455,18 +445,37 @@ function saveGame() {
   localStorage.setItem("mlb-guesses", JSON.stringify(guesses));
 }
 
-function resetIfNewDay() {
-  const lastDate = localStorage.getItem("mlb-date");
+function resetIfNewGame() {
+  const currentGameId = getEasternDayNumber() % GAMES.length;
 
-  const today = new Date().toDateString();
+  const savedGameId = localStorage.getItem("mlb-game-id");
 
-  if (lastDate !== today) {
-    localStorage.setItem("mlb-date", today);
+  if (savedGameId != currentGameId) {
+    localStorage.setItem("mlb-game-id", currentGameId);
+
     localStorage.removeItem("mlb-guesses");
     localStorage.removeItem("mlb-win");
+
+    guesses = [];
   }
 }
 
-resetIfNewDay();
+function getEasternDayNumber() {
+  const easternDate = new Date(
+    new Date().toLocaleString("en-US", {
+      timeZone: "America/New_York"
+    })
+  );
 
+  return Math.floor(
+    new Date(
+      easternDate.getFullYear(),
+      easternDate.getMonth(),
+      easternDate.getDate()
+    ).getTime() / 86400000
+  );
+}
+
+resetIfNewGame();
+loadGame();
 loadLeaderboard();
