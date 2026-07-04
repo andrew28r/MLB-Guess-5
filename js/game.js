@@ -376,13 +376,16 @@ function shareResults() {
       green++;
     } else if (rank <= 10) {
       yellow++;
-    } else {
+    } else if (rank <=25) {
       red++;
+    } else {
+      gray++;
     }
   });
 
   const text =
 `MLB Guess 5
+Total guesses: ${guesses.length}
 🟢 ${green}
 🟡 ${yellow}
 🔴 ${red}
@@ -416,7 +419,7 @@ function openPopup() {
       green++;
     } else if (rank <= 10) {
       yellow++;
-    } else if (rank <= 25) {
+    } else if (rank <=25) {
       red++;
     } else {
       gray++;
@@ -424,6 +427,9 @@ function openPopup() {
   });
 
   scoreStats.innerHTML = `
+    <div class="score-row">
+      Total guesses: ${guesses.length}
+    </div>
     <div class="score-row">
       <span class="dot green"></span> ${green}
     </div>
