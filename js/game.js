@@ -20,6 +20,15 @@ const GAMES = [
     sortStat: "homeRuns",
     season: 2021
   },
+
+  {
+    title: "Most Stolen Bases in 2021",
+    stats: "season",
+    group: "hitting",
+    sortStat: "stolenBases",
+    season: 2021
+  },
+  
   {
     title: "Most Career Home Runs All-Time",
     stats: "career",
@@ -48,6 +57,25 @@ const GAMES = [
     startDate: "1990-01-01",
     endDate: "1999-12-31"
   },
+  
+  {
+    title: "Most Strikeouts in the 80s",
+    stats: "byDateRange",
+    group: "pitching",
+    sortStat: "strikeOuts",
+    startDate: "1980-01-01",
+    endDate: "1989-12-31"
+  },
+  
+  {
+    title: "Most Strikeouts in the 2000s",
+    stats: "byDateRange",
+    group: "pitching",
+    sortStat: "strikeOuts",
+    startDate: "2000-01-01",
+    endDate: "2009-12-31"
+  },
+
   {
     title: "Most Home Runs in 2025",
     stats: "season",
@@ -70,6 +98,7 @@ function loadGame() {
 
   if (saved) {
     guesses = JSON.parse(saved);
+    checkWin();
   }
 }
 
