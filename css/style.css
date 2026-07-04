@@ -115,6 +115,10 @@ input:focus {
   text-align: left;
 }
 
+#lastGuess {
+  min-height: 42px;
+}
+
 .row,
 .rowGuess {
   margin-bottom: 8px;
