@@ -374,12 +374,10 @@ function shareResults() {
       gray++;
     } else if (rank <= 5) {
       green++;
-    } else if (rank <= 10 && rank > 5) {
+    } else if (rank <= 10) {
       yellow++;
-    } else if (rank <=25 && rank > 10) {
-      red++;
     } else {
-      gray++;
+      red++;
     }
   });
 
@@ -416,9 +414,9 @@ function openPopup() {
       gray++;
     } else if (rank <= 5) {
       green++;
-    } else if (rank <= 10 && rank > 5) {
+    } else if (rank <= 10) {
       yellow++;
-    } else if (rank <=25 && rank > 10) {
+    } else if (rank <= 25) {
       red++;
     } else {
       gray++;
