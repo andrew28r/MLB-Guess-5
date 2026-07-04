@@ -98,7 +98,6 @@ function loadGame() {
 
   if (saved) {
     guesses = JSON.parse(saved);
-    checkWin();
   }
 }
 
@@ -155,6 +154,9 @@ async function loadLeaderboard() {
   render();
   lastGuess.innerHTML = "";
   guessCounter.textContent = `Guesses: ${guesses.length}`;
+
+  
+  checkWin();
 }
 
 async function searchPlayers(query) {
