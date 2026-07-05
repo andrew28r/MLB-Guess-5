@@ -21,6 +21,7 @@
 
     <div id="menu" class="menu hidden">
       <button class="menu-btn" id="hintBtn">Hint</button>
+      <button class="menu-btn" id="giveUpBtn">Give Up</button>
       <button class="menu-btn" id="testGameBtn">CONFIG - Test Game</button>
       <button class="menu-btn" id="resetGameBtn">CONFIG - Reset Data</button>
     </div>
@@ -50,12 +51,29 @@
 <div id="winPopup" class="popup">
   <div class="popup-content">
 
-    <h2>You Win!</h2>
+    <h2 id="winTitle">You Win!</h2>
 
     <div id="scoreStats" class="score-stats"></div>
 
     <button onclick="shareResults()">Share Results</button>
     <button onclick="closePopup()">Close</button>
+
+    <button class="leaderboard-btn" onclick="openLeaderboard()">View Leaderboard</button>
+
+  </div>
+</div>
+
+
+<div id="leaderboardPopup" class="popup">
+  <div class="popup-content">
+
+    <h2>Leaderboard</h2>
+
+    <div id="leaderboardList" class="leaderboard-list">
+      <!-- scores will be injected here -->
+    </div>
+
+    <button onclick="closeLeaderboard()">Close</button>
 
   </div>
 </div>

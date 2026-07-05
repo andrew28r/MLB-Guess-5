@@ -214,6 +214,7 @@ button:hover {
   text-align: center;
 }
 
+
 /* ---------- Mobile tweaks ---------- */
 
 @media (max-width: 480px) {
@@ -403,6 +404,12 @@ button:hover {
   color: #777;
   border-color: #ccc;
 }
+.day-btn.failed {
+  background: #af4c4c;
+  color: white;
+  border-color: #af4c4c;
+}
+
 
 .last5games {
   width: 100%;
@@ -426,3 +433,32 @@ button:hover {
   color: #333;
   text-align: center;
 }
+.leaderboard-btn {
+    width: 160px;          /* Makes the button narrower */
+    padding: 8px 12px;     /* Makes it shorter */
+    font-size: 14px;       /* Smaller text */
+    margin: 45px auto 0;   /* Moves it down 25px and centers it */
+    display: block;
+}
+
+.leaderboard-list {
+  max-height: 60vh;        /* limits height to viewport */
+  overflow-y: auto;        /* enables scrolling */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 6px;      /* prevents scrollbar overlapping text */
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 18px;
+}
+.leaderboard-popup h2 {
+  position: sticky;
+  top: 0;
+  background: white;
+  padding: 10px 0;
+}
+#leaderboardList .row {
+  justify-content: space-between;
+  text-align: left;
+}
+

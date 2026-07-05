@@ -26,15 +26,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     btn.dataset.date = iso;
 
-    const savedKey = `mlb_completed_${iso}`;
-    const isCompleted = localStorage.getItem(savedKey) === "true";
-
     btn.addEventListener("click", () => {
       window.location.href = `game.html?date=${iso}`;
     });
 
-    if (isCompleted) {
-      btn.classList.add("completed");
+
+    const outcomeKey = `mlb_outcome_${iso}`;
+    const outcome = localStorage.getItem(outcomeKey);
+
+    if (outcome === "win") {
+      btn.classList.add("completed"); // green
+    } else if (outcome === "giveup") {
+      btn.classList.add("failed"); // red
     } else {
       btn.classList.add("incomplete");
     }
