@@ -10,14 +10,33 @@
 
 <body>
 
+<div class="top-bar">
+
+  <button class="icon-btn" id="backBtn">❮</button>
+
+  <div class="title">MLB Guess 5</div>
+
+  <div class="menu-wrapper">
+    <button class="icon-btn" id="menuBtn">☰</button>
+
+    <div id="menu" class="menu hidden">
+      <button class="menu-btn" id="hintBtn">Hint</button>
+      <button class="menu-btn" id="testGameBtn">CONFIG - Test Game</button>
+      <button class="menu-btn" id="resetGameBtn">CONFIG - Reset Data</button>
+    </div>
+  </div>
+
+</div>
+
 <div class="container">
-  <h2>MLB Guess 5</h2>
   
   <h3 id="gameTitle">Loading...</h3>
 
   <div class="input-wrapper">
-    <div id="guessCounter" class="guess-counter">Guesses: 0</div>
-
+    <div class="top-input">
+      <div id="guessCounter">Guesses: 0</div>
+      <div id="hint"></div>
+    </div>
     <input id="search" placeholder="Guess a player..." autocomplete="off">
     <div id="dropdown" class="dropdown"></div>
 
