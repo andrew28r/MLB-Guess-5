@@ -11,7 +11,12 @@ const menu = document.getElementById("menu");
 let hintedPlayer = null;
 let testOffset = 0;
 
+let GAME;
 
+function initGame() {
+  const selectedDate = getSelectedDate();
+  GAME = getDailyGameFromDate(selectedDate);
+}
 
 /* =========================
    CONFIG
@@ -107,6 +112,41 @@ function getDailyGame() {
   return game;
 }
 
+function getDailyGameFromDate(dateString) {
+  const seed = getEasternDayNumberFromDate(dateString);
+
+  const stat = pick(seed, STATS);
+
+  const mode = pick(seed + 1, ["season", "decade", "career"]);
+
+  const game = {
+    group: stat.group,
+    sortStat: stat.stat
+  };
+
+  if (mode === "career") {
+    game.stats = "career";
+    game.title = `Most Career ${stat.title}`;
+  }
+
+  if (mode === "season") {
+    const year = pick(seed + 2, YEARS);
+    game.stats = "season";
+    game.season = year;
+    game.title = `Most ${stat.title} in ${year}`;
+  }
+
+  if (mode === "decade") {
+    const decade = pick(seed + 3, DECADES);
+    game.stats = "byDateRange";
+    game.startDate = `${decade}-01-01`;
+    game.endDate = `${decade + 9}-12-31`;
+    game.title = `Most ${stat.title} in the ${decade}s`;
+  }
+
+  return game;
+}
+
 
 
 /* =========================
@@ -119,23 +159,40 @@ let matches = [];
 let activeIndex = -1;
 let searchTimeout = null;
 
-let GAME = getDailyGame();
-
+let selectedDate = getSelectedDate();
 
 
 /* =========================
    STORAGE
 ========================= */
 
+const GAME_KEY = `mlb-${selectedDate}`;
+
+function getSelectedDate() {
+  const params = new URLSearchParams(window.location.search);
+  const urlDate = params.get("date");
+
+  if (urlDate) return urlDate;
+
+  return new Date().toISOString().split("T")[0];
+}
+
 function loadGame() {
-  const saved = localStorage.getItem("mlb-guesses");
+  const saved = localStorage.getItem(`${GAME_KEY}-guesses`);
   if (saved) guesses = JSON.parse(saved);
 }
 
 function saveGame() {
-  localStorage.setItem("mlb-guesses", JSON.stringify(guesses));
+  localStorage.setItem(`${GAME_KEY}-guesses`, JSON.stringify(guesses));
 }
 
+function markGameComplete(dateString) {
+  localStorage.setItem(`mlb_completed_${dateString}`, "true");
+}
+
+function getTodayKey() {
+  return new Date().toISOString().split("T")[0];
+}
 
 
 /* =========================
@@ -148,13 +205,33 @@ function resetIfNewGame() {
 
   if (savedGameId != currentGameId) {
     localStorage.setItem("mlb-game-id", currentGameId);
-    localStorage.removeItem("mlb-guesses");
+
+    localStorage.removeItem(`${GAME_KEY}-guesses`);
+    localStorage.removeItem(`${GAME_KEY}-win`);
     localStorage.removeItem("mlb-win");
+
     hint.textContent = "";
     guesses = [];
   }
 }
 
+function getEasternDayNumberFromDate(dateString) {
+  const date = new Date(dateString);
+
+  const easternDate = new Date(
+    new Date(date).toLocaleString("en-US", {
+      timeZone: "America/New_York"
+    })
+  );
+
+  return Math.floor(
+    new Date(
+      easternDate.getFullYear(),
+      easternDate.getMonth(),
+      easternDate.getDate()
+    ).getTime() / 86400000
+  );
+}
 
 
 /* =========================
@@ -380,12 +457,13 @@ function checkWin() {
     .map(p => p.name.toLowerCase());
 
   const guessed = guesses.map(g => g.name.toLowerCase());
-
   if (topFive.every(n => guessed.includes(n))) {
+
+    localStorage.setItem(`mlb_completed_${selectedDate}`, "true");
+
     openPopup();
   }
 }
-
 function closePopup() {
   document.getElementById("winPopup").style.display = "none";
 }
@@ -540,7 +618,7 @@ function renderLastGuess() {
 document.getElementById("testGameBtn").addEventListener("click", async () => {
   testOffset++;
 
-  GAME = getDailyGame();
+  GAME = getDailyGameFromDate(getSelectedDate());
 
   guesses = [];
   matches = [];
@@ -655,6 +733,7 @@ input.addEventListener("keydown", (e) => {
    INIT
 ========================= */
 
+initGame();
 resetIfNewGame();
 loadGame();
 loadLeaderboard();

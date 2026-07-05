@@ -24,6 +24,7 @@ body {
   position: relative;
 }
 
+
 /* ---------- Input ---------- */
 .top-input {
     display: flex;
@@ -276,7 +277,13 @@ button:hover {
     grid-template-columns: 50px 1fr 50px;
     align-items: center;
 }
+.left {
+    justify-self: start;
+}
 
+.right {
+    justify-self: end;
+}
 .title {
     text-align: center;
     font-size: 20px;
@@ -366,4 +373,56 @@ button:hover {
   height: 28px;
   border-radius: 50%;
   object-fit: cover;
+}
+
+.day-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 0;
+}
+
+.day-btn {
+  padding: 6px 8px;
+  font-size: 12px;
+  border-radius: 6px;
+  min-width: 48px;
+  border: 1px solid #ccc;
+}
+
+/* ✅ completed */
+.day-btn.completed {
+  background: #4caf50;
+  color: white;
+  border-color: #4caf50;
+}
+
+/* ❌ not completed */
+.day-btn.incomplete {
+  background: #ddd;
+  color: #777;
+  border-color: #ccc;
+}
+
+.last5games {
+  width: 100%;
+  max-width: 300px;
+
+  margin: 12px auto 0 auto;
+  padding: 10px 12px;
+
+  background: transparent;
+  border: 2px solid #c2c2c2;
+  border-radius: 8px;
+
+  box-sizing: border-box;
+
+  text-align: center;
+}
+.last5games h4 {
+  margin: 0 0 8px 0;   /* removes weird gap */
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
 }
