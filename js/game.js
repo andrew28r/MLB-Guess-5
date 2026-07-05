@@ -7,6 +7,7 @@ const message = document.getElementById("message");
 const gameTitle = document.getElementById("gameTitle");
 const hint = document.getElementById("hint");
 
+let hintedPlayer = null;
 let testOffset = 0;
 
 /* =========================
@@ -290,8 +291,7 @@ function getHeadshot(playerId) {
 /* =========================
    GAME LOGIC
 ========================= */
-
-function guessPlayer() {
+async function guessPlayer() {
   const value = input.value.trim();
   if (!value) return;
 
@@ -305,15 +305,40 @@ function guessPlayer() {
     return;
   }
 
-  message.textContent = "";
+  // 🔥 VALIDATE AGAINST MLB API
+  const validPlayer = await validatePlayerName(value);
 
+  if (!validPlayer) {
+    message.textContent = `❌ "${value}" is not a valid MLB player`;
+    input.value = "";
+    dropdown.style.display = "none";
+    return;
+  }
+
+  if (
+    hintedPlayer &&
+    validPlayer.fullName.toLowerCase() === hintedPlayer.name.toLowerCase()
+  ) {
+    hint.textContent = "";
+    hintedPlayer = null;
+  }
+  
+  // now check leaderboard AFTER validation
   const player = leaderboard.find(
     p => p.name.toLowerCase() === normalized
   );
 
   guesses.unshift(
-    player || { rank: null, name: value, value: "-" }
+    player || {
+      rank: null,
+      name: validPlayer.fullName,
+      value: "-"
+    }
   );
+
+  
+
+  message.textContent = "";
 
   render();
   guessCounter.textContent = `Guesses: ${guesses.length}`;
@@ -324,6 +349,23 @@ function guessPlayer() {
   input.value = "";
   dropdown.style.display = "none";
   saveGame();
+}
+
+async function validatePlayerName(name) {
+  const res = await fetch(
+    `https://statsapi.mlb.com/api/v1/people/search?names=${encodeURIComponent(name)}`
+  );
+
+  const data = await res.json();
+
+  const people = data.people || [];
+
+  // find exact match (case-insensitive)
+  const match = people.find(
+    p => p.fullName.toLowerCase() === name.toLowerCase()
+  );
+
+  return match || null;
 }
 
 function checkWin() {
@@ -441,6 +483,7 @@ document.getElementById("hintBtn").addEventListener("click", () => {
         return;
     }
 
+    hintedPlayer = player;
     hint.textContent = `Hint: ${player.team}`;
     
     const menu = document.getElementById("menu");
