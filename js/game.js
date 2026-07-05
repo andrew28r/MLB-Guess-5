@@ -6,9 +6,12 @@ const guessCounter = document.getElementById("guessCounter");
 const message = document.getElementById("message");
 const gameTitle = document.getElementById("gameTitle");
 const hint = document.getElementById("hint");
+const menu = document.getElementById("menu");
 
 let hintedPlayer = null;
 let testOffset = 0;
+
+
 
 /* =========================
    CONFIG
@@ -27,6 +30,8 @@ const STATS = [
 
 const YEARS = [1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025];
 const DECADES = [1980, 1990, 2000, 2010];
+
+
 
 /* =========================
    SEED SYSTEM
@@ -57,25 +62,11 @@ function getEasternDayNumber() {
   );
 }
 
+
+
 /* =========================
    GAME GENERATOR
 ========================= */
-
-document.getElementById("testGameBtn").addEventListener("click", async () => {
-  testOffset++;
-
-  GAME = getDailyGame();
-
-  guesses = [];
-  matches = [];
-  leaderboard = [];
-
-  input.value = "";
-  message.textContent = "";
-  hint.textContent = "";
-
-  await loadLeaderboard();
-});
 
 function getDailyGame() {
   const seed = getEasternDayNumber() + testOffset;
@@ -116,6 +107,8 @@ function getDailyGame() {
   return game;
 }
 
+
+
 /* =========================
    STATE
 ========================= */
@@ -127,6 +120,8 @@ let activeIndex = -1;
 let searchTimeout = null;
 
 let GAME = getDailyGame();
+
+
 
 /* =========================
    STORAGE
@@ -140,6 +135,8 @@ function loadGame() {
 function saveGame() {
   localStorage.setItem("mlb-guesses", JSON.stringify(guesses));
 }
+
+
 
 /* =========================
    RESET DAILY GAME
@@ -157,6 +154,8 @@ function resetIfNewGame() {
     guesses = [];
   }
 }
+
+
 
 /* =========================
    LEADERBOARD
@@ -200,9 +199,12 @@ async function loadLeaderboard() {
   if (leaderboard.length) checkWin();
 }
 
+
+
 /* =========================
    SEARCH
 ========================= */
+
 async function searchPlayers(query) {
   const q = query.trim();
 
@@ -233,6 +235,8 @@ async function searchPlayers(query) {
   activeIndex = -1;
   renderDropdown();
 }
+
+
 
 /* =========================
    UI HELPERS
@@ -288,9 +292,13 @@ function renderDropdown() {
 function getHeadshot(playerId) {
   return `https://img.mlbstatic.com/mlb/images/players/head_shot/${playerId}.jpg`;
 }
+
+
+
 /* =========================
    GAME LOGIC
 ========================= */
+
 async function guessPlayer() {
   const value = input.value.trim();
   if (!value) return;
@@ -305,7 +313,7 @@ async function guessPlayer() {
     return;
   }
 
-  // 🔥 VALIDATE AGAINST MLB API
+  // VALIDATE AGAINST MLB API
   const validPlayer = await validatePlayerName(value);
 
   if (!validPlayer) {
@@ -335,8 +343,6 @@ async function guessPlayer() {
       value: "-"
     }
   );
-
-  
 
   message.textContent = "";
 
@@ -379,6 +385,102 @@ function checkWin() {
     openPopup();
   }
 }
+
+function closePopup() {
+  document.getElementById("winPopup").style.display = "none";
+}
+
+
+function shareResults() {
+  let green = 0;
+  let yellow = 0;
+  let red = 0;
+  let gray = 0;
+
+  guesses.forEach(g => {
+    const rank = g.rank;
+
+    if (typeof rank !== "number") {
+      gray++;
+    } else if (rank <= 5) {
+      green++;
+    } else if (rank <= 10) {
+      yellow++;
+    } else if (rank <=25) {
+      red++;
+    } else {
+      gray++;
+    }
+  });
+
+  const text =
+`MLB Guess 5
+Total guesses: ${guesses.length}
+🟢 ${green}
+🟡 ${yellow}
+🔴 ${red}
+⚫ ${gray}
+Game: ${GAME.title}`;
+
+  navigator.clipboard.writeText(text)
+    .then(() => {
+      alert("Copied to clipboard!");
+    })
+    .catch(() => {
+      alert("Copy failed");
+    });
+}
+
+function openPopup() {
+  const popup = document.getElementById("winPopup");
+  const scoreStats = document.getElementById("scoreStats");
+
+  let green = 0;
+  let yellow = 0;
+  let red = 0;
+  let gray = 0;
+
+  guesses.forEach(g => {
+    const rank = g.rank;
+
+    if (typeof rank !== "number") {
+      gray++;
+    } else if (rank <= 5) {
+      green++;
+    } else if (rank <= 10) {
+      yellow++;
+    } else if (rank <=25) {
+      red++;
+    } else {
+      gray++;
+    }
+  });
+
+  scoreStats.innerHTML = `
+    <div class="score-row">
+      Total guesses: ${guesses.length}
+    </div>
+    <div class="score-row">
+      <span class="dot green"></span> ${green}
+    </div>
+
+    <div class="score-row">
+      <span class="dot yellow"></span> ${yellow}
+    </div>
+
+    <div class="score-row">
+      <span class="dot red"></span> ${red}
+    </div>
+
+    <div class="score-row">
+      <span class="dot gray"></span> ${gray}
+    </div>
+  `;
+
+  popup.style.display = "flex";
+}
+
+
 
 /* =========================
    RENDER
@@ -429,6 +531,89 @@ function renderLastGuess() {
   lastGuess.appendChild(div);
 }
 
+
+
+/* =========================
+   DOCUMENT EVENTS
+========================= */
+
+document.getElementById("testGameBtn").addEventListener("click", async () => {
+  testOffset++;
+
+  GAME = getDailyGame();
+
+  guesses = [];
+  matches = [];
+  leaderboard = [];
+
+  input.value = "";
+  message.textContent = "";
+  hint.textContent = "";
+
+  await loadLeaderboard();
+});
+
+document.getElementById("resetGameBtn").addEventListener("click", async () => {
+  localStorage.removeItem("mlb-guesses");
+  localStorage.removeItem("mlb-win");
+  
+  guesses = [];
+  matches = [];
+  leaderboard = [];
+
+  input.value = "";
+  message.textContent = "";
+  hint.textContent = "";
+
+  await loadLeaderboard();
+});
+
+document.getElementById("backBtn").onclick = () => {
+    window.location.href = "index.html";
+};
+
+document.getElementById("menuBtn").onclick = () => {
+    menu.classList.toggle("hidden");
+};
+
+document.getElementById("hintBtn").addEventListener("click", () => {
+    const guessed = guesses.map(g => g.name.toLowerCase());
+
+    const player = leaderboard
+        .filter(p => p.rank <= 5)
+        .reverse()
+        .find(p => !guessed.includes(p.name.toLowerCase()));
+
+    if (!player) {
+        hint.textContent = "All Top 5 players have been guessed!";
+        return;
+    }
+
+    hintedPlayer = player;
+    hint.textContent = `Hint: ${player.team}`;
+    
+    const menu = document.getElementById("menu");
+    menu.classList.add("hidden");
+});
+
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".container")) {
+    dropdown.style.display = "none";
+  }
+});
+
+
+document.addEventListener("click", (e) => {
+    const menu = document.getElementById("menu");
+    const wrapper = document.querySelector(".menu-wrapper");
+
+    if (!wrapper.contains(e.target)) {
+        menu.classList.add("hidden");
+    }
+});
+
+
+
 /* =========================
    INPUT EVENTS
 ========================= */
@@ -464,67 +649,7 @@ input.addEventListener("keydown", (e) => {
   }
 });
 
-document.addEventListener("click", (e) => {
-  if (!e.target.closest(".container")) {
-    dropdown.style.display = "none";
-  }
-});
 
-document.getElementById("hintBtn").addEventListener("click", () => {
-    const guessed = guesses.map(g => g.name.toLowerCase());
-
-    const player = leaderboard
-        .filter(p => p.rank <= 5)
-        .reverse()
-        .find(p => !guessed.includes(p.name.toLowerCase()));
-
-    if (!player) {
-        hint.textContent = "All Top 5 players have been guessed!";
-        return;
-    }
-
-    hintedPlayer = player;
-    hint.textContent = `Hint: ${player.team}`;
-    
-    const menu = document.getElementById("menu");
-    menu.classList.add("hidden");
-});
-
-document.getElementById("backBtn").onclick = () => {
-    window.location.href = "index.html";
-};
-
-const menu = document.getElementById("menu");
-
-document.getElementById("menuBtn").onclick = () => {
-    menu.classList.toggle("hidden");
-};
-
-document.addEventListener("click", (e) => {
-    const menu = document.getElementById("menu");
-    const wrapper = document.querySelector(".menu-wrapper");
-
-    if (!wrapper.contains(e.target)) {
-        menu.classList.add("hidden");
-    }
-});
-
-
-
-document.getElementById("resetGameBtn").addEventListener("click", async () => {
-  localStorage.removeItem("mlb-guesses");
-  localStorage.removeItem("mlb-win");
-  
-  guesses = [];
-  matches = [];
-  leaderboard = [];
-
-  input.value = "";
-  message.textContent = "";
-  hint.textContent = "";
-
-  await loadLeaderboard();
-});
 
 /* =========================
    INIT
