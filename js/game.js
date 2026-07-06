@@ -1045,7 +1045,6 @@ loadGame();
 loadLeaderboard();
 applyLockUI();
 
-
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden) location.reload();
 });
