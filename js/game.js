@@ -51,6 +51,59 @@ const YEARS = [
 
 const DECADES = [1970, 1980, 1990, 2000, 2010];
 
+function buildAllGames() {
+  const games = [];
+
+  for (const stat of STATS) {
+    // Career
+    games.push({
+      group: stat.group,
+      sortStat: stat.stat,
+      stats: "career",
+      title: `Most Career ${stat.title}`
+    });
+
+    // Seasons
+    for (const year of YEARS) {
+      games.push({
+        group: stat.group,
+        sortStat: stat.stat,
+        stats: "season",
+        season: year,
+        title: `Most ${stat.title} in ${year}`
+      });
+    }
+
+    // Decades
+    for (const decade of DECADES) {
+      games.push({
+        group: stat.group,
+        sortStat: stat.stat,
+        stats: "byDateRange",
+        startDate: `${decade}-01-01`,
+        endDate: `${decade + 9}-12-31`,
+        title: `Most ${stat.title} in the ${decade}s`
+      });
+    }
+  }
+
+  return games;
+}
+
+function shuffleSeeded(array, seed = 12345) {
+  const arr = [...array];
+
+  for (let i = arr.length - 1; i > 0; i--) {
+    seed++;
+    const j = Math.floor(seededRandom(seed) * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+
+  return arr;
+}
+
+const ALL_GAMES = shuffleSeeded(buildAllGames());
+
 
 
 /* =========================
@@ -87,81 +140,17 @@ function getEasternDayNumber() {
 /* =========================
    GAME GENERATOR
 ========================= */
-
 function getDailyGame() {
-  const seed = getEasternDayNumber() + testOffset;
+  const day = getEasternDayNumber();
 
-  const stat = pick(seed, STATS);
-
-  const mode = pick(seed + 1, [
-    "season",
-    "decade",
-    "career"
-  ]);
-
-  const game = {
-    group: stat.group,
-    sortStat: stat.stat
-  };
-
-  if (mode === "career") {
-    game.stats = "career";
-    game.title = `Most Career ${stat.title}`;
-  }
-
-  if (mode === "season") {
-    const year = pick(seed + 2, YEARS);
-    game.stats = "season";
-    game.season = year;
-    game.title = `Most ${stat.title} in ${year}`;
-  }
-
-  if (mode === "decade") {
-    const decade = pick(seed + 3, DECADES);
-    game.stats = "byDateRange";
-    game.startDate = `${decade}-01-01`;
-    game.endDate = `${decade + 9}-12-31`;
-    game.title = `Most ${stat.title} in the ${decade}s`;
-  }
-
-  return game;
+  return ALL_GAMES[day % ALL_GAMES.length];
 }
 
 function getDailyGameFromDate(dateString) {
-  const seed = getEasternDayNumberFromDate(dateString);
+  const day = getEasternDayNumberFromDate(dateString);
 
-  const stat = pick(seed, STATS);
-
-  const mode = pick(seed + 1, ["season", "decade", "career"]);
-
-  const game = {
-    group: stat.group,
-    sortStat: stat.stat
-  };
-
-  if (mode === "career") {
-    game.stats = "career";
-    game.title = `Most Career ${stat.title}`;
-  }
-
-  if (mode === "season") {
-    const year = pick(seed + 2, YEARS);
-    game.stats = "season";
-    game.season = year;
-    game.title = `Most ${stat.title} in ${year}`;
-  }
-
-  if (mode === "decade") {
-    const decade = pick(seed + 3, DECADES);
-    game.stats = "byDateRange";
-    game.startDate = `${decade}-01-01`;
-    game.endDate = `${decade + 9}-12-31`;
-    game.title = `Most ${stat.title} in the ${decade}s`;
-  }
-
-  return game;
+  return ALL_GAMES[day % ALL_GAMES.length];
 }
-
 
 
 /* =========================
@@ -188,7 +177,7 @@ function getSelectedDate() {
 
   if (urlDate) return urlDate;
 
-  return new Date().toISOString().split("T")[0];
+  return getEasternDateString();
 }
 
 function loadGame() {
@@ -205,7 +194,7 @@ function markGameComplete(dateString) {
 }
 
 function getTodayKey() {
-  return new Date().toISOString().split("T")[0];
+  return getEasternDateString();
 }
 
 
@@ -644,10 +633,15 @@ function renderLastGuess() {
 document.getElementById("testGameBtn").addEventListener("click", async () => {
   testDayOffset++;
 
-  const base = new Date();
+
+  const base = new Date(getEasternDateString());
   base.setDate(base.getDate() + testDayOffset);
 
-  const nextDate = base.toISOString().split("T")[0];
+  const year = base.getFullYear();
+  const month = String(base.getMonth() + 1).padStart(2, "0");
+  const day = String(base.getDate()).padStart(2, "0");
+
+  const nextDate = `${year}-${month}-${day}`;
 
   selectedDate = nextDate;
   GAME_KEY = `mlb-${selectedDate}`;
@@ -899,6 +893,19 @@ function applyLockUI() {
     input.disabled = true;
     input.placeholder = "Game finished";
   }
+}
+function getEasternDateString() {
+  const eastern = new Date(
+    new Date().toLocaleString("en-US", {
+      timeZone: "America/New_York"
+    })
+  );
+
+  const year = eastern.getFullYear();
+  const month = String(eastern.getMonth() + 1).padStart(2, "0");
+  const day = String(eastern.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
 /* =========================
    INIT
