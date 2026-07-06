@@ -8,13 +8,14 @@ const gameTitle = document.getElementById("gameTitle");
 const hint = document.getElementById("hint");
 const menu = document.getElementById("menu");
 
+
 let gameLocked = false;
 
 let gameOutcome = null; 
 // "win" | "giveup"
 
 let hintedPlayer = null;
-let testOffset = 0;
+let hintClickCount = 0;
 
 let testDayOffset = 0;
 
@@ -61,16 +62,17 @@ const TEAMS = [
 ];
 
 const STATS = [
-  { stat: "homeRuns", title: "Home Runs", group: "hitting" },
-  { stat: "triples", title: "Triples", group: "hitting" },
-  { stat: "doubles", title: "Doubles", group: "hitting" },
-  { stat: "hits", title: "Hits", group: "hitting" },
-  { stat: "walks", title: "Walks", group: "hitting" },
-  { stat: "rbi", title: "RBI", group: "hitting" },
-  { stat: "stolenBases", title: "Stolen Bases", group: "hitting" },
-  { stat: "wins", title: "Wins", group: "pitching" },
-  { stat: "strikeOuts", title: "Strikeouts", group: "pitching" },
-  { stat: "saves", title: "Saves", group: "pitching" }
+  { stat: "homeRuns", title: "Home Runs", group: "hitting", includeTeamSeason: true },
+  { stat: "triples", title: "Triples", group: "hitting", includeTeamSeason: false },
+  { stat: "doubles", title: "Doubles", group: "hitting", includeTeamSeason: false },
+  { stat: "hits", title: "Hits", group: "hitting", includeTeamSeason: false },
+  { stat: "walks", title: "Walks", group: "hitting", includeTeamSeason: false },
+  { stat: "rbi", title: "RBI", group: "hitting", includeTeamSeason: false },
+  { stat: "stolenBases", title: "Stolen Bases", group: "hitting", includeTeamSeason: false },
+
+  { stat: "wins", title: "Wins", group: "pitching", includeTeamSeason: false },
+  { stat: "strikeOuts", title: "Strikeouts", group: "pitching", includeTeamSeason: false },
+  { stat: "saves", title: "Saves", group: "pitching", includeTeamSeason: false }
 ];
 
 const YEARS = [
@@ -79,7 +81,7 @@ const YEARS = [
   1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 
   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
   2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 
-  2020, 2021, 2022, 2023, 2024, 2025, 2026
+  2020, 2021, 2022, 2023, 2024, 2025
 ];
 
 const DECADES = [1970, 1980, 1990, 2000, 2010, 2020];
@@ -132,20 +134,22 @@ function buildAllGames() {
     }
 
     // Team Seasons
-    for (const team of TEAMS) {
-      for (const year of YEARS) {
-        games.push({
-          group: stat.group,
-          sortStat: stat.stat,
-          stats: "season",
-          season: year,
-          teamId: team.id,
-          teamName: team.name,
-          title: `Most ${stat.title} in ${year} for ${team.name}`
-        });
+    if (stat.includeTeamSeason) {
+      for (const team of TEAMS) {
+        for (const year of YEARS) {
+          games.push({
+            group: stat.group,
+            sortStat: stat.stat,
+            stats: "season",
+            season: year,
+            teamId: team.id,
+            teamName: team.name,
+            title: `Most ${stat.title} in ${year} for ${team.name}`
+          });
+        }
       }
     }
-
+    
     // TeamDecades
     for (const team of TEAMS) {
       for (const decade of DECADES) {
@@ -344,11 +348,14 @@ async function loadLeaderboard() {
     rank: i + 1,
     name: p.player.fullName,
     value: Number(p.stat[GAME.sortStat] || 0),
-    team: p.team?.name || "Unknown"
+    team: p.team?.name || "Unknown",
+    
+    position: p.position.abbreviation || "N/A"
   }));
 
   gameTitle.textContent = GAME.title;
-
+  hintClickCount = 0;
+  
   render();
   lastGuess.innerHTML = "";
   guessCounter.textContent = `Guesses: ${guesses.length}`;
@@ -519,6 +526,8 @@ async function guessPlayer() {
 
   input.value = "";
   dropdown.style.display = "none";
+  
+  hintClickCount = 0;
   saveGame();
 }
 
@@ -781,7 +790,6 @@ document.getElementById("backBtn").onclick = () => {
 document.getElementById("menuBtn").onclick = () => {
     menu.classList.toggle("hidden");
 };
-
 document.getElementById("hintBtn").addEventListener("click", () => {
     const guessed = guesses.map(g => g.name.toLowerCase());
 
@@ -796,9 +804,46 @@ document.getElementById("hintBtn").addEventListener("click", () => {
     }
 
     hintedPlayer = player;
-    hint.textContent = `Hint: ${player.team}`;
-    
-    const menu = document.getElementById("menu");
+    hintClickCount++;
+
+    const initials = player.name
+        .split(" ")
+        .map(n => n[0])
+        .join(".") + ".";
+
+    const isTeamGame = !!GAME.teamId;
+
+    if (hintClickCount === 1) {
+        // TEAM GAME → position first
+        if (isTeamGame) {
+            hint.textContent = `Hint: ${player.position}`;
+        } 
+        // NON TEAM GAME → team first
+        else {
+            hint.textContent = `Hint: ${player.team}`;
+        }
+    } 
+    else if (hintClickCount === 2) {
+        if (isTeamGame) {
+              hint.textContent = `Hint: ${player.position} (${initials})`;
+          } 
+          // NON TEAM GAME → team first
+          else {
+              hint.textContent = `Hint: ${player.team} (${initials})`
+          }
+    } 
+    else if (hintClickCount === 3) {
+        hint.textContent = ``;
+
+        input.value = player.name;
+
+        setTimeout(() => {
+            guessPlayer();
+        }, 100);
+
+        hintClickCount = 0;
+    }
+
     menu.classList.add("hidden");
 });
 
