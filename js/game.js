@@ -508,6 +508,7 @@ async function guessPlayer() {
   ) {
     hint.textContent = "";
     hintedPlayer = null;
+    hintClickCount = 0;
   }
   
   // now check leaderboard AFTER validation
@@ -534,7 +535,6 @@ async function guessPlayer() {
   input.value = "";
   dropdown.style.display = "none";
   
-  hintClickCount = 0;
   saveGame();
 }
 
