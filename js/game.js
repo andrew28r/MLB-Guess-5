@@ -28,12 +28,45 @@ function initGame() {
 /* =========================
    CONFIG
 ========================= */
+const TEAMS = [
+  //{ id: 109, name: "Arizona Diamondbacks" },
+  { id: 144, name: "Atlanta Braves" },
+  { id: 147, name: "New York Yankees" },
+  /*{ id: 110, name: "Baltimore Orioles" },
+  { id: 111, name: "Boston Red Sox" },
+  { id: 112, name: "Chicago Cubs" },
+  { id: 145, name: "Chicago White Sox" },
+  { id: 113, name: "Cincinnati Reds" },
+  { id: 114, name: "Cleveland Guardians" },
+  { id: 115, name: "Colorado Rockies" },
+  { id: 116, name: "Detroit Tigers" },
+  { id: 117, name: "Houston Astros" },
+  { id: 118, name: "Kansas City Royals" },
+  { id: 108, name: "Los Angeles Angels" },
+  { id: 119, name: "Los Angeles Dodgers" },
+  { id: 158, name: "Milwaukee Brewers" },
+  { id: 142, name: "Minnesota Twins" },
+  { id: 121, name: "New York Mets" },
+  { id: 133, name: "Oakland Athletics" },
+  { id: 143, name: "Philadelphia Phillies" },
+  { id: 134, name: "Pittsburgh Pirates" },
+  { id: 135, name: "San Diego Padres" },
+  { id: 137, name: "San Francisco Giants" },
+  { id: 136, name: "Seattle Mariners" },
+  { id: 138, name: "St. Louis Cardinals" },
+  { id: 139, name: "Tampa Bay Rays" },
+  { id: 140, name: "Texas Rangers" },
+  { id: 141, name: "Toronto Blue Jays" },
+  { id: 120, name: "Washington Nationals" }*/
+];
 
 const STATS = [
   { stat: "homeRuns", title: "Home Runs", group: "hitting" },
-  { stat: "rbi", title: "RBI", group: "hitting" },
-  { stat: "hits", title: "Hits", group: "hitting" },
+  { stat: "triples", title: "Triples", group: "hitting" },
   { stat: "doubles", title: "Doubles", group: "hitting" },
+  { stat: "hits", title: "Hits", group: "hitting" },
+  { stat: "walks", title: "Walks", group: "hitting" },
+  { stat: "rbi", title: "RBI", group: "hitting" },
   { stat: "stolenBases", title: "Stolen Bases", group: "hitting" },
   { stat: "wins", title: "Wins", group: "pitching" },
   { stat: "strikeOuts", title: "Strikeouts", group: "pitching" },
@@ -49,7 +82,7 @@ const YEARS = [
   2020, 2021, 2022, 2023, 2024, 2025, 2026
 ];
 
-const DECADES = [1970, 1980, 1990, 2000, 2010];
+const DECADES = [1970, 1980, 1990, 2000, 2010, 2020];
 
 function buildAllGames() {
   const games = [];
@@ -84,6 +117,49 @@ function buildAllGames() {
         endDate: `${decade + 9}-12-31`,
         title: `Most ${stat.title} in the ${decade}s`
       });
+    }
+    
+    // TEAM CAREER
+    for (const team of TEAMS) {
+      games.push({
+        group: stat.group,
+        sortStat: stat.stat,
+        stats: "career",
+        teamId: team.id,
+        teamName: team.name,
+        title: `Most Career ${stat.title} for ${team.name}`
+      });
+    }
+
+    // Team Seasons
+    for (const team of TEAMS) {
+      for (const year of YEARS) {
+        games.push({
+          group: stat.group,
+          sortStat: stat.stat,
+          stats: "season",
+          season: year,
+          teamId: team.id,
+          teamName: team.name,
+          title: `Most ${stat.title} in ${year} for ${team.name}`
+        });
+      }
+    }
+
+    // TeamDecades
+    for (const team of TEAMS) {
+      for (const decade of DECADES) {
+        games.push({
+          group: stat.group,
+          sortStat: stat.stat,
+          stats: "byDateRange",
+          startDate: `${decade}-01-01`,
+          endDate: `${decade + 9}-12-31`,
+          teamId: team.id,
+          teamName: team.name,
+          title: `Most ${stat.title} in the ${decade}s for ${team.name}`
+        });
+      }
     }
   }
 
@@ -254,6 +330,7 @@ async function loadLeaderboard() {
   if (GAME.startDate) url += `&startDate=${GAME.startDate}`;
   if (GAME.endDate) url += `&endDate=${GAME.endDate}`;
   if (GAME.season) url += `&season=${GAME.season}`;
+  if (GAME.teamId) url += `&teamId=${GAME.teamId}`;
   //if (GAME.stats === "byDateRange") url += `&playerPool=all`;
 
   url += "&playerPool=all";
@@ -729,17 +806,14 @@ document.addEventListener("click", (e) => {
   if (!e.target.closest(".container")) {
     dropdown.style.display = "none";
   }
+  const menu = document.getElementById("menu");
+  const wrapper = document.querySelector(".menu-wrapper");
+
+  if (!wrapper.contains(e.target)) {
+    menu.classList.add("hidden");
+  }
 });
 
-
-document.addEventListener("click", (e) => {
-    const menu = document.getElementById("menu");
-    const wrapper = document.querySelector(".menu-wrapper");
-
-    if (!wrapper.contains(e.target)) {
-        menu.classList.add("hidden");
-    }
-});
 
 
 
