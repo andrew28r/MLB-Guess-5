@@ -133,7 +133,8 @@ function buildAllGames() {
       });
     }
 
-    // Team Seasons
+    // Team Seasons 
+    /*
     if (stat.includeTeamSeason) {
       for (const team of TEAMS) {
         for (const year of YEARS) {
@@ -148,8 +149,8 @@ function buildAllGames() {
           });
         }
       }
-    }
-    
+    }*/
+
     // TeamDecades
     for (const team of TEAMS) {
       for (const decade of DECADES) {
@@ -184,7 +185,14 @@ function shuffleSeeded(array, seed = 12345) {
 
 const ALL_GAMES = shuffleSeeded(buildAllGames());
 
+function getGameForDate(dateString) {
+  const seed = getEasternDayNumberFromDate(dateString);
 
+  const games = buildAllGames();
+  const shuffled = shuffleSeeded(games, seed);
+
+  return shuffled[0];
+}
 
 /* =========================
    SEED SYSTEM
@@ -732,7 +740,8 @@ document.getElementById("testGameBtn").addEventListener("click", async () => {
   selectedDate = nextDate;
   GAME_KEY = `mlb-${selectedDate}`;
 
-  GAME = getDailyGameFromDate(nextDate);
+  //GAME = getDailyGameFromDate(nextDate);
+  GAME = getGameForDate(selectedDate);
 
   guesses = [];
   matches = [];
@@ -1035,3 +1044,8 @@ resetIfNewGame();
 loadGame();
 loadLeaderboard();
 applyLockUI();
+
+
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) location.reload();
+});
