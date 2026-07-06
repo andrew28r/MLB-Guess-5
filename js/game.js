@@ -1,3 +1,59 @@
+const supabaseUrl = "https://aqnlbvlfkkhqewvdcehu.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxbmxidmxma2tocWV3dmRjZWh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzMDA4NTYsImV4cCI6MjA5ODg3Njg1Nn0.9Kw8ESBCDQGzqcg5lQnrl06DUr7-T7Ag8mmm2PzdWYI";
+
+const client = supabase.createClient(supabaseUrl, supabaseKey);
+
+
+let selectedDate = getSelectedDate();
+let gameInfoObj;
+/*
+const gameData = {
+    group: "hitting",
+    sortStat: "homeRuns",
+    stats: "byDateRange",
+    startDate: "2020-01-01",
+    endDate: "2029-12-31",
+    title: "Most Home Runs in the 2020s"
+};*/
+
+window.insertData = async function () {
+  const gameObj = getGameForDate(selectedDate);
+
+  const { error } = await client
+    .from("games")
+    .upsert([
+      {
+        date: selectedDate,
+        gameinfo: gameObj
+      }
+    ], { onConflict: "date" });
+
+  document.getElementById("output").textContent =
+    error ? error.message : "Game created!";
+};
+
+window.checkData = async function (getAll = false) {
+
+    let query = client.from("games").select("*");
+
+    if (!getAll) {
+        query = query.eq("date", selectedDate).maybeSingle();
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+        document.getElementById("output").textContent = error.message;
+        return null;
+    }
+
+    document.getElementById("output").textContent =
+        JSON.stringify(data, null, 2);
+
+    return data;
+};
+
+
 const input = document.getElementById("search");
 const dropdown = document.getElementById("dropdown");
 const board = document.getElementById("board");
@@ -10,21 +66,14 @@ const menu = document.getElementById("menu");
 
 
 let gameLocked = false;
-
 let gameOutcome = null; 
 // "win" | "giveup"
-
 let hintedPlayer = null;
 let hintClickCount = 0;
-
 let testDayOffset = 0;
-
 let GAME;
 
-function initGame() {
-  const selectedDate = getSelectedDate();
-  GAME = getDailyGameFromDate(selectedDate);
-}
+
 
 /* =========================
    CONFIG
@@ -86,112 +135,85 @@ const YEARS = [
 
 const DECADES = [1970, 1980, 1990, 2000, 2010, 2020];
 
-function buildAllGames() {
-  const games = [];
 
-  for (const stat of STATS) {
-    // Career
-    games.push({
-      group: stat.group,
-      sortStat: stat.stat,
-      stats: "career",
-      title: `Most Career ${stat.title}`
-    });
-
-    // Seasons
-    for (const year of YEARS) {
-      games.push({
-        group: stat.group,
-        sortStat: stat.stat,
-        stats: "season",
-        season: year,
-        title: `Most ${stat.title} in ${year}`
-      });
-    }
-
-    // Decades
-    for (const decade of DECADES) {
-      games.push({
-        group: stat.group,
-        sortStat: stat.stat,
-        stats: "byDateRange",
-        startDate: `${decade}-01-01`,
-        endDate: `${decade + 9}-12-31`,
-        title: `Most ${stat.title} in the ${decade}s`
-      });
-    }
-    
-    // TEAM CAREER
-    for (const team of TEAMS) {
-      games.push({
-        group: stat.group,
-        sortStat: stat.stat,
-        stats: "career",
-        teamId: team.id,
-        teamName: team.name,
-        title: `Most Career ${stat.title} for ${team.name}`
-      });
-    }
-
-    // Team Seasons 
-    /*
-    if (stat.includeTeamSeason) {
-      for (const team of TEAMS) {
-        for (const year of YEARS) {
-          games.push({
-            group: stat.group,
-            sortStat: stat.stat,
-            stats: "season",
-            season: year,
-            teamId: team.id,
-            teamName: team.name,
-            title: `Most ${stat.title} in ${year} for ${team.name}`
-          });
-        }
-      }
-    }*/
-
-    // TeamDecades
-    for (const team of TEAMS) {
-      for (const decade of DECADES) {
-        games.push({
-          group: stat.group,
-          sortStat: stat.stat,
-          stats: "byDateRange",
-          startDate: `${decade}-01-01`,
-          endDate: `${decade + 9}-12-31`,
-          teamId: team.id,
-          teamName: team.name,
-          title: `Most ${stat.title} in the ${decade}s for ${team.name}`
-        });
-      }
-    }
-  }
-
-  return games;
+function getGameSignature(game) {
+  return JSON.stringify({
+    group: game.group,
+    sortStat: game.sortStat,
+    stats: game.stats,
+    season: game.season || null,
+    teamId: game.teamId || null,
+    startDate: game.startDate || null,
+    endDate: game.endDate || null
+  });
 }
 
-function shuffleSeeded(array, seed = 12345) {
-  const arr = [...array];
-
-  for (let i = arr.length - 1; i > 0; i--) {
-    seed++;
-    const j = Math.floor(seededRandom(seed) * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-
-  return arr;
-}
-
-const ALL_GAMES = shuffleSeeded(buildAllGames());
 
 function getGameForDate(dateString) {
   const seed = getEasternDayNumberFromDate(dateString);
 
-  const games = buildAllGames();
-  const shuffled = shuffleSeeded(games, seed);
+  const r1 = seededRandom(seed);
+  const r2 = seededRandom(seed + 1);
+  const r3 = seededRandom(seed + 2);
+  const r4 = seededRandom(seed + 3);
+  const r5 = seededRandom(seed + 4);
 
-  return shuffled[0];
+  const isTeamGame = r1 < 0.35;
+
+  const team = isTeamGame
+    ? TEAMS[Math.floor(r2 * TEAMS.length)]
+    : null;
+      
+  let availableStats = STATS;
+
+  if (isTeamGame) {
+    // example rule: exclude stats that are not allowed for team season games
+    availableStats = STATS.filter(s => s.includeTeamSeason !== false);
+  }
+
+  const stat = availableStats[Math.floor(r3 * availableStats.length)];
+
+  let game = {
+    group: stat.group,
+    sortStat: stat.stat
+  };
+
+  if (isTeamGame) {
+    game.teamId = team.id;
+    game.teamName = team.name;
+  }
+
+  if (r4 < 0.33) {
+    game.stats = "career";
+    game.title = isTeamGame
+      ? `Most Career ${stat.title} for ${team.name}`
+      : `Most Career ${stat.title}`;
+  }
+
+  else if (r4 < 0.66) {
+    const year = YEARS[Math.floor(r5 * YEARS.length)];
+
+    game.stats = "season";
+    game.season = year;
+
+    game.title = isTeamGame
+      ? `Most ${stat.title} in ${year} for ${team.name}`
+      : `Most ${stat.title} in ${year}`;
+  }
+
+  else {
+    const decade = DECADES[Math.floor(r5 * DECADES.length)];
+
+    game.stats = "byDateRange";
+    game.startDate = `${decade}-01-01`;
+    game.endDate = `${decade + 9}-12-31`;
+
+    game.title = isTeamGame
+      ? `Most ${stat.title} in the ${decade}s for ${team.name}`
+      : `Most ${stat.title} in the ${decade}s`;
+  }
+
+  return game;
 }
 
 /* =========================
@@ -203,9 +225,6 @@ function seededRandom(seed) {
   return x - Math.floor(x);
 }
 
-function pick(seed, arr) {
-  return arr[Math.floor(seededRandom(seed) * arr.length)];
-}
 
 function getEasternDayNumber() {
   const easternDate = new Date(
@@ -228,17 +247,6 @@ function getEasternDayNumber() {
 /* =========================
    GAME GENERATOR
 ========================= */
-function getDailyGame() {
-  const day = getEasternDayNumber();
-
-  return ALL_GAMES[day % ALL_GAMES.length];
-}
-
-function getDailyGameFromDate(dateString) {
-  const day = getEasternDayNumberFromDate(dateString);
-
-  return ALL_GAMES[day % ALL_GAMES.length];
-}
 
 
 /* =========================
@@ -251,7 +259,6 @@ let matches = [];
 let activeIndex = -1;
 let searchTimeout = null;
 
-let selectedDate = getSelectedDate();
 
 
 /* =========================
@@ -275,14 +282,6 @@ function loadGame() {
 
 function saveGame() {
   localStorage.setItem(`${GAME_KEY}-guesses`, JSON.stringify(guesses));
-}
-
-function markGameComplete(dateString) {
-  localStorage.setItem(`mlb_completed_${dateString}`, "true");
-}
-
-function getTodayKey() {
-  return getEasternDateString();
 }
 
 
@@ -332,17 +331,17 @@ function getEasternDayNumberFromDate(dateString) {
 async function loadLeaderboard() {
   let url =
     `https://statsapi.mlb.com/api/v1/stats?` +
-    `stats=${GAME.stats}` +
-    `&group=${GAME.group}` +
+    `stats=${gameInfoObj.stats}` +
+    `&group=${gameInfoObj.group}` +
     `&sportId=1` +
-    `&sortStat=${GAME.sortStat}` +
+    `&sortStat=${gameInfoObj.sortStat}` +
     `&order=desc` +
     `&limit=1000`;
 
-  if (GAME.startDate) url += `&startDate=${GAME.startDate}`;
-  if (GAME.endDate) url += `&endDate=${GAME.endDate}`;
-  if (GAME.season) url += `&season=${GAME.season}`;
-  if (GAME.teamId) url += `&teamId=${GAME.teamId}`;
+  if (gameInfoObj.startDate) url += `&startDate=${gameInfoObj.startDate}`;
+  if (gameInfoObj.endDate) url += `&endDate=${gameInfoObj.endDate}`;
+  if (gameInfoObj.season) url += `&season=${gameInfoObj.season}`;
+  if (gameInfoObj.teamId) url += `&teamId=${gameInfoObj.teamId}`;
   //if (GAME.stats === "byDateRange") url += `&playerPool=all`;
 
   url += "&playerPool=all";
@@ -355,13 +354,13 @@ async function loadLeaderboard() {
   leaderboard = leaders.map((p, i) => ({
     rank: i + 1,
     name: p.player.fullName,
-    value: Number(p.stat[GAME.sortStat] || 0),
+    value: Number(p.stat[gameInfoObj.sortStat] || 0),
     team: p.team?.name || "Unknown",
     
     position: p.position.abbreviation || "N/A"
   }));
 
-  gameTitle.textContent = GAME.title;
+  gameTitle.textContent = gameInfoObj.title;
   hintClickCount = 0;
   
   render();
@@ -555,6 +554,31 @@ async function validatePlayerName(name) {
 
   return match || null;
 }
+async function findExistingGame(date, game) {
+  const signature = getGameSignature(game);
+
+  const { data, error } = await client
+    .from("games")
+    .select("gameinfo")
+    .eq("date", date)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    return null;
+  }
+
+  if (!data?.gameinfo) return null;
+
+  const existing =
+    typeof data.gameinfo === "string"
+      ? JSON.parse(data.gameinfo)
+      : data.gameinfo;
+
+  return getGameSignature(existing) === signature
+    ? existing
+    : null;
+}
 
 function checkWin() {
   const topFive = leaderboard
@@ -567,8 +591,9 @@ function checkWin() {
 
     gameOutcome = "win";
 
-    
     gameLocked = true;
+    saveGame();
+
     localStorage.setItem(`mlb_outcome_${selectedDate}`, "win");
     applyLockUI();
 
@@ -579,42 +604,23 @@ function closePopup() {
   document.getElementById("winPopup").style.display = "none";
 }
 
-
 function shareResults() {
-  let green = 0;
-  let yellow = 0;
-  let red = 0;
-  let gray = 0;
+  const { green, yellow, red, gray } = getGuessStats();
 
-  guesses.forEach(g => {
-    const rank = g.rank;
-
-    if (typeof rank !== "number") {
-      gray++;
-    } else if (rank <= 5) {
-      green++;
-    } else if (rank <= 10) {
-      yellow++;
-    } else if (rank <=25) {
-      red++;
-    } else {
-      gray++;
-    }
-  });
   const outcomeText =
     gameOutcome === "giveup"
       ? "Gave Up ❌"
       : "Solved ✅";
 
   const text =
-  `MLB Guess 5
-  ${outcomeText}
-  Total guesses: ${guesses.length}
-  🟢 ${green}
-  🟡 ${yellow}
-  🔴 ${red}
-  ⚫ ${gray}
-  Game: ${GAME.title}`;
+`MLB Guess 5
+${outcomeText}
+Total guesses: ${guesses.length}
+🟢 ${green}
+🟡 ${yellow}
+🔴 ${red}
+⚫ ${gray}
+Game: ${GAME.title}`;
 
   navigator.clipboard.writeText(text)
     .then(() => {
@@ -631,27 +637,8 @@ function openPopup() {
   const title = document.getElementById("winTitle");
 
   title.textContent = "You Win!";
-  
-  let green = 0;
-  let yellow = 0;
-  let red = 0;
-  let gray = 0;
 
-  guesses.forEach(g => {
-    const rank = g.rank;
-
-    if (typeof rank !== "number") {
-      gray++;
-    } else if (rank <= 5) {
-      green++;
-    } else if (rank <= 10) {
-      yellow++;
-    } else if (rank <=25) {
-      red++;
-    } else {
-      gray++;
-    }
-  });
+  const { green, yellow, red, gray } = getGuessStats();
 
   scoreStats.innerHTML = `
     <div class="score-row">
@@ -660,15 +647,12 @@ function openPopup() {
     <div class="score-row">
       <span class="dot green"></span> ${green}
     </div>
-
     <div class="score-row">
       <span class="dot yellow"></span> ${yellow}
     </div>
-
     <div class="score-row">
       <span class="dot red"></span> ${red}
     </div>
-
     <div class="score-row">
       <span class="dot gray"></span> ${gray}
     </div>
@@ -676,7 +660,40 @@ function openPopup() {
 
   popup.style.display = "flex";
 }
+function openGiveUpPopup() {
+  const popup = document.getElementById("winPopup");
+  const title = document.getElementById("winTitle");
+  const scoreStats = document.getElementById("scoreStats");
 
+  gameOutcome = "giveup";
+  title.textContent = "You Gave Up!";
+
+  gameLocked = true;
+  localStorage.setItem(`mlb_outcome_${selectedDate}`, "giveup");
+  applyLockUI();
+
+  const { green, yellow, red, gray } = getGuessStats();
+
+  scoreStats.innerHTML = `
+    <div class="score-row">
+      Total guesses: ${guesses.length}
+    </div>
+    <div class="score-row">
+      <span class="dot green"></span> ${green}
+    </div>
+    <div class="score-row">
+      <span class="dot yellow"></span> ${yellow}
+    </div>
+    <div class="score-row">
+      <span class="dot red"></span> ${red}
+    </div>
+    <div class="score-row">
+      <span class="dot gray"></span> ${gray}
+    </div>
+  `;
+
+  popup.style.display = "flex";
+}
 
 
 /* =========================
@@ -740,8 +757,8 @@ document.getElementById("testGameBtn").addEventListener("click", async () => {
   selectedDate = nextDate;
   GAME_KEY = `mlb-${selectedDate}`;
 
-  //GAME = getDailyGameFromDate(nextDate);
-  GAME = getGameForDate(selectedDate);
+  gameInfoObj = getGameForDate(selectedDate);
+  GAME = gameInfoObj;
 
   guesses = [];
   matches = [];
@@ -958,55 +975,6 @@ document.getElementById("giveUpBtn").addEventListener("click", () => {
 
 
 
-function openGiveUpPopup() {
-  const popup = document.getElementById("winPopup");
-  const title = document.getElementById("winTitle");
-  const scoreStats = document.getElementById("scoreStats");
-  gameOutcome = "giveup";
-  title.textContent = "You Gave Up!";
- 
-  gameLocked = true;
-  localStorage.setItem(`mlb_outcome_${selectedDate}`, "giveup");
-  applyLockUI();
-  // still show stats (optional — you can remove if you want)
-  let green = 0, yellow = 0, red = 0, gray = 0;
-
-  guesses.forEach(g => {
-    const rank = g.rank;
-
-    if (typeof rank !== "number") {
-      gray++;
-    } else if (rank <= 5) {
-      green++;
-    } else if (rank <= 10) {
-      yellow++;
-    } else if (rank <= 25) {
-      red++;
-    } else {
-      gray++;
-    }
-  });
-
-  scoreStats.innerHTML = `
-    <div class="score-row">
-      Total guesses: ${guesses.length}
-    </div>
-    <div class="score-row">
-      <span class="dot green"></span> ${green}
-    </div>
-    <div class="score-row">
-      <span class="dot yellow"></span> ${yellow}
-    </div>
-    <div class="score-row">
-      <span class="dot red"></span> ${red}
-    </div>
-    <div class="score-row">
-      <span class="dot gray"></span> ${gray}
-    </div>
-  `;
-
-  popup.style.display = "flex";
-}
 
 function loadOutcomeLock() {
   const outcome = localStorage.getItem(`mlb_outcome_${selectedDate}`);
@@ -1035,16 +1003,56 @@ function getEasternDateString() {
 
   return `${year}-${month}-${day}`;
 }
+
+function getGuessStats() {
+    return guesses.reduce((stats, g) => {
+        if (typeof g.rank !== "number") {
+            stats.gray++;
+        } else if (g.rank <= 5) {
+            stats.green++;
+        } else if (g.rank <= 10) {
+            stats.yellow++;
+        } else if (g.rank <= 25) {
+            stats.red++;
+        } else {
+            stats.gray++;
+        }
+
+        return stats;
+    }, {
+        green: 0,
+        yellow: 0,
+        red: 0,
+        gray: 0
+    });
+}
 /* =========================
    INIT
 ========================= */
-initGame();
-loadOutcomeLock();
-resetIfNewGame();
-loadGame();
-loadLeaderboard();
-applyLockUI();
+(async function boot() {
+  loadOutcomeLock();
+  resetIfNewGame();
+  loadGame();
 
-document.addEventListener("visibilitychange", () => {
-  if (!document.hidden) location.reload();
-});
+  const generatedGame = getGameForDate(selectedDate);
+
+  const existingGame = await findExistingGame(selectedDate, generatedGame);
+
+  if (existingGame) {
+    gameInfoObj = existingGame;
+  } else {
+    await client.from("games").upsert([{
+      date: selectedDate,
+      gameinfo: generatedGame
+    }], { onConflict: "date" });
+
+    gameInfoObj = generatedGame;
+  }
+
+  GAME = gameInfoObj;
+
+  console.log("Loaded game:", GAME);
+
+  await loadLeaderboard();
+  applyLockUI();
+})();
