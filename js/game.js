@@ -67,6 +67,10 @@ async function loadPlayerGame() {
     statusGameCompleted = "false";
   }
 
+  if (statusGameCompleted === "true") {
+    gameLocked = true;
+    applyLockUI()
+  }
   console.log("Loaded guesses:", guesses);
 }
 
