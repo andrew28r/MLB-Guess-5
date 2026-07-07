@@ -80,7 +80,8 @@ window.addPlayerGame = async function (
   guesses = "",
   guessesNumber = "0",
   win = "",
-  completed = ""
+  completed = "",
+  completedSameDay = ""
 ) {
   const playerId = localStorage.getItem("playerId");
   if (!playerId) return null;
@@ -94,6 +95,7 @@ window.addPlayerGame = async function (
       guessesNumber,
       win,
       completed,
+      completedSameDay
     })
     .select()
     .single();
@@ -112,7 +114,8 @@ window.updatePlayerGame = async function (
   guesses,
   guessesNumber,
   win,
-  completed
+  completed,
+  completedSameDay
 ) {
   const playerId = localStorage.getItem("playerId");
   if (!playerId) return null;
@@ -124,6 +127,7 @@ window.updatePlayerGame = async function (
       guessesNumber,
       win,
       completed,
+      completedSameDay
     })
     .eq("playerId", playerId)
     .eq("date", date)
@@ -406,7 +410,11 @@ async function saveGame() {
     guesses: JSON.stringify(guesses),
     guessesNumber: String(guesses.length),
     win: String(statusGameWin),
-    completed: String(statusGameCompleted)
+    completed: String(statusGameCompleted),
+    completedSameDay:
+      selectedDate === getEasternDateString()
+        ? "true"
+        : "false"
   };
 
   if (!playerGame) {
@@ -415,7 +423,8 @@ async function saveGame() {
       gameData.guesses,
       gameData.guessesNumber,
       gameData.win,
-      gameData.completed
+      gameData.completed,
+      gameData.completedSameDay
     );
 
     console.log("Game Added.");
@@ -425,7 +434,8 @@ async function saveGame() {
       gameData.guesses,
       gameData.guessesNumber,
       gameData.win,
-      gameData.completed
+      gameData.completed,
+      gameData.completedSameDay
     );
 
     console.log("Game Updated.");
