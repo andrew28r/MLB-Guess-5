@@ -706,26 +706,42 @@ async function validatePlayerName(name) {
 }
 
 function checkWin() {
+  // Game already finished
+  if (gameLocked || statusGameCompleted === "true") return;
+
+  // Cannot possibly win before 5 guesses
+  if (guesses.length < 5) return;
+
   const topFive = leaderboard
     .filter(p => p.rank <= 5)
     .map(p => p.name.toLowerCase());
 
+  // Leaderboard is invalid
+  if (topFive.length !== 5) return;
+
   const guessed = guesses.map(g => g.name.toLowerCase());
 
-  if (topFive.every(n => guessed.includes(n))) {
+  // Must have exactly the 5 unique Top 5 players
+  const guessedTopFive = [...new Set(
+    guessed.filter(name => topFive.includes(name))
+  )];
 
-    gameOutcome = "win";
-    statusGameWin = "true";
-    statusGameCompleted = "true";
-    gameLocked = true;
-    saveGame();
+  if (guessedTopFive.length !== 5) return;
 
-    localStorage.setItem(`mlb_outcome_${selectedDate}`, "win");
-    applyLockUI();
+  // WIN
+  gameOutcome = "win";
+  statusGameWin = "true";
+  statusGameCompleted = "true";
+  gameLocked = true;
 
-    openPopup();
-  }
+  saveGame();
+
+  localStorage.setItem(`mlb_outcome_${selectedDate}`, "win");
+
+  applyLockUI();
+  openPopup();
 }
+
 function closePopup() {
   document.getElementById("winPopup").style.display = "none";
 }
