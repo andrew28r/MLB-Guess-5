@@ -106,38 +106,73 @@ async function loadDayButtons() {
   const container = document.getElementById("dayButtons");
   container.innerHTML = "";
 
+  const playerId = localStorage.getItem("playerId");
+  if (!playerId) return;
+
+  // Get recent dates
+  const dates = [];
+
   const today = new Date();
 
   for (let i = 4; i >= 0; i--) {
     const date = new Date(today);
     date.setDate(date.getDate() - i);
 
-    const iso = formatLocalDate(date)
+    dates.push(formatLocalDate(date));
+  }
+
+
+  // Get all games at once
+  const { data: games, error } = await supabaseClient
+    .from("playerGames")
+    .select("*")
+    .eq("playerId", playerId)
+    .in("date", dates);
+
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+
+  // Create buttons
+  dates.forEach((iso) => {
+
+    const date = new Date(iso + "T00:00:00");
+
     const month = date.getMonth() + 1;
     const day = date.getDate();
 
     const btn = document.createElement("button");
+
     btn.classList.add("day-btn");
     btn.textContent = `${month}/${day}`;
     btn.dataset.date = iso;
+
 
     btn.addEventListener("click", () => {
       window.location.href = `game.html?date=${iso}`;
     });
 
-    // Wait for Supabase result
-    const game = await playerGames(iso);
+
+    const game = games.find(g => g.date === iso);
+
 
     if (game?.win === "true") {
       btn.classList.add("completed");
-    } else if (game?.completed === "true") {
+    } 
+    else if (game?.completed === "true") {
       btn.classList.add("failed");
-    } else {
+    } 
+    else {
       btn.classList.add("incomplete");
     }
 
+
     container.appendChild(btn);
-  }
+
+  });
 }
 
 document.addEventListener("DOMContentLoaded", loadDayButtons);
