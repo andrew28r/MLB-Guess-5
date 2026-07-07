@@ -868,7 +868,7 @@ function getGameFromSeed(seed) {
 
     game.title = isTeamGame
       ? `Most ${stat.title} in ${year} for ${team.name}`
-      : `Most ${stat.title}`;
+      : `Most ${stat.title} in ${year}`;
   } else {
     const decade = DECADES[Math.floor(r5 * DECADES.length)];
 
@@ -878,7 +878,7 @@ function getGameFromSeed(seed) {
 
     game.title = isTeamGame
       ? `Most ${stat.title} in the ${decade}s for ${team.name}`
-      : `Most ${stat.title}`;
+      : `Most ${stat.title} in the ${decade}s`;
   }
 
   return game;
@@ -974,7 +974,6 @@ function renderLastGuess() {
 document.getElementById("testGameBtn").addEventListener("click", async () => {
   testDayOffset++;
 
-
   const base = new Date(getEasternDateString());
   base.setDate(base.getDate() + testDayOffset);
 
@@ -987,6 +986,23 @@ document.getElementById("testGameBtn").addEventListener("click", async () => {
   selectedDate = nextDate;
 
   gameInfoObj = await generateUniqueGame(selectedDate);
+
+  const { error } = await client
+    .from("games")
+    .upsert(
+      {
+        date: selectedDate,
+        gameinfo: gameInfoObj
+      },
+      {
+        onConflict: "date"
+      }
+    );
+
+  if (error) {
+    console.error("Failed to save test game:", error);
+  }
+
   GAME = gameInfoObj;
 
   guesses = [];
