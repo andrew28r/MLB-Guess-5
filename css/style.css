@@ -23,7 +23,21 @@ body {
   text-align: center;
   position: relative;
 }
+#username {
+  margin-bottom: 15px;
+  padding: 8px;
+}
 
+#playerIdPopup button {
+  margin-top: 10px;
+  padding: 8px 20px;
+}
+
+#loginYesBtn,
+#loginNoBtn {
+  margin: 10px;
+  padding: 8px 20px;
+}
 
 /* ---------- Input ---------- */
 .top-input {

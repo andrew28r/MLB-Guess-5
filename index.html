@@ -4,6 +4,7 @@
   <title>MLB Guess 5</title>
 
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/menu.js" defer></script>
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +12,14 @@
 
 <body>
   
+<div class="top-bar">
+
+
+  <div class="title"></div>
+  <div class="title"></div>
+
+  <button class="icon-btn" onclick="openPopup()">⚙</button>
+</div>
 <div class="container">
   <h2>MLB Guess 5</h2>
 
@@ -23,8 +32,34 @@
 
   <div id="dayButtons" class="day-buttons"></div>
 </div>
+
+<div id="playerIdPopup" class="popup" style="display:none;">
+  <div class="popup-content">
+
+    <h2 id="playerIdTitle">Login</h2>
+
+    <input id="username" placeholder="Username..." autocomplete="off">
+
+    <button onclick="submitPlayerId()">Submit</button>
+
+  </div>
+</div>
+<div id="loginConfirmPopup" class="popup" style="display:none;">
+  <div class="popup-content">
+
+    <h2>Account Found</h2>
+
+    <p id="loginConfirmText"></p>
+
+    <button id="loginYesBtn">Login</button>
+    <button id="loginNoBtn">Cancel</button>
+
+  </div>
+</div>
+
+
 <footer class="footer">
-  <p>version alpha 1.5  |  last updated 07/05/2026</p>
+  <p>version alpha 2.0  |  last updated 07/06/2026</p>
 </footer>
 
 </body>

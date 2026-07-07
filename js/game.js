@@ -6,15 +6,134 @@ const client = supabase.createClient(supabaseUrl, supabaseKey);
 
 let selectedDate = getSelectedDate();
 let gameInfoObj;
+
+let playerGame;
+let statusGameWin = "false";
+let statusGameCompleted = "false";
+
+window.playerGames = async function (date) {
+  const playerId = localStorage.getItem("playerId");
+  console.log(playerId);
+
+  if (!playerId) return null;
+
+  const { data, error } = await client
+    .from("playerGames")
+    .select("*")
+    .eq("playerId", playerId)
+    .eq("date", date)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    return null;
+  }
+
+  return data;
+};
 /*
-const gameData = {
-    group: "hitting",
-    sortStat: "homeRuns",
-    stats: "byDateRange",
-    startDate: "2020-01-01",
-    endDate: "2029-12-31",
-    title: "Most Home Runs in the 2020s"
-};*/
+(async () => {
+    playerGame = await playerGames(selectedDate);
+    console.log(playerGame);
+
+    if (playerGame) {
+        guesses = JSON.parse(playerGame.guesses);
+
+        statusGameWin = playerGame.win || "false";
+        statusGameCompleted = playerGame.completed || "false";
+    } else {
+        guesses = [];
+        statusGameWin = "false";
+        statusGameCompleted = "false";
+    }
+
+    console.log("Loaded guesses:", guesses);
+})();
+*/
+
+async function loadPlayerGame() {
+  playerGame = await playerGames(selectedDate);
+
+  if (playerGame) {
+    guesses = playerGame.guesses
+      ? JSON.parse(playerGame.guesses)
+      : [];
+
+    statusGameWin = playerGame.win || "false";
+    statusGameCompleted = playerGame.completed || "false";
+  } else {
+    guesses = [];
+    statusGameWin = "false";
+    statusGameCompleted = "false";
+  }
+
+  console.log("Loaded guesses:", guesses);
+}
+
+
+window.addPlayerGame = async function (
+  date,
+  guesses = "",
+  guessesNumber = "0",
+  win = "",
+  completed = ""
+) {
+  const playerId = localStorage.getItem("playerId");
+  if (!playerId) return null;
+
+  const { data, error } = await client
+    .from("playerGames")
+    .insert({
+      date,
+      playerId,
+      guesses,
+      guessesNumber,
+      win,
+      completed,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error(error);
+    return null;
+  }
+
+  return data;
+};
+
+
+window.updatePlayerGame = async function (
+  date,
+  guesses,
+  guessesNumber,
+  win,
+  completed
+) {
+  const playerId = localStorage.getItem("playerId");
+  if (!playerId) return null;
+
+  const { data, error } = await client
+    .from("playerGames")
+    .update({
+      guesses,
+      guessesNumber,
+      win,
+      completed,
+    })
+    .eq("playerId", playerId)
+    .eq("date", date)
+    .select()
+    .single();
+
+  if (error) {
+    console.error(error);
+    return null;
+  }
+
+  return data;
+};
+
 
 window.insertData = async function () {
   const gameObj = getGameForDate(selectedDate);
@@ -68,6 +187,7 @@ const menu = document.getElementById("menu");
 let gameLocked = false;
 let gameOutcome = null; 
 // "win" | "giveup"
+
 let hintedPlayer = null;
 let hintClickCount = 0;
 let testDayOffset = 0;
@@ -264,7 +384,6 @@ let searchTimeout = null;
 /* =========================
    STORAGE
 ========================= */
-let GAME_KEY = `mlb-${selectedDate}`;
 
 function getSelectedDate() {
   const params = new URLSearchParams(window.location.search);
@@ -275,15 +394,39 @@ function getSelectedDate() {
   return getEasternDateString();
 }
 
-function loadGame() {
-  const saved = localStorage.getItem(`${GAME_KEY}-guesses`);
-  if (saved) guesses = JSON.parse(saved);
-}
 
-function saveGame() {
-  localStorage.setItem(`${GAME_KEY}-guesses`, JSON.stringify(guesses));
-}
+async function saveGame() {
+  playerGame = await playerGames(selectedDate);
 
+  const gameData = {
+    guesses: JSON.stringify(guesses),
+    guessesNumber: String(guesses.length),
+    win: String(statusGameWin),
+    completed: String(statusGameCompleted)
+  };
+
+  if (!playerGame) {
+    await addPlayerGame(
+      selectedDate,
+      gameData.guesses,
+      gameData.guessesNumber,
+      gameData.win,
+      gameData.completed
+    );
+
+    console.log("Game Added.");
+  } else {
+    await updatePlayerGame(
+      selectedDate,
+      gameData.guesses,
+      gameData.guessesNumber,
+      gameData.win,
+      gameData.completed
+    );
+
+    console.log("Game Updated.");
+  }
+}
 
 /* =========================
    RESET DAILY GAME
@@ -590,7 +733,8 @@ function checkWin() {
   if (topFive.every(n => guessed.includes(n))) {
 
     gameOutcome = "win";
-
+    statusGameWin = "true";
+    statusGameCompleted = "true";
     gameLocked = true;
     saveGame();
 
@@ -660,7 +804,8 @@ function openPopup() {
 
   popup.style.display = "flex";
 }
-function openGiveUpPopup() {
+
+async function openGiveUpPopup() {
   const popup = document.getElementById("winPopup");
   const title = document.getElementById("winTitle");
   const scoreStats = document.getElementById("scoreStats");
@@ -668,8 +813,11 @@ function openGiveUpPopup() {
   gameOutcome = "giveup";
   title.textContent = "You Gave Up!";
 
+  statusGameWin = "false";
+  statusGameCompleted = "true";
   gameLocked = true;
-  localStorage.setItem(`mlb_outcome_${selectedDate}`, "giveup");
+
+  await saveGame(); // <-- ADD THIS
   applyLockUI();
 
   const { green, yellow, red, gray } = getGuessStats();
@@ -755,7 +903,6 @@ document.getElementById("testGameBtn").addEventListener("click", async () => {
   const nextDate = `${year}-${month}-${day}`;
 
   selectedDate = nextDate;
-  GAME_KEY = `mlb-${selectedDate}`;
 
   gameInfoObj = getGameForDate(selectedDate);
   GAME = gameInfoObj;
@@ -782,6 +929,11 @@ document.getElementById("resetGameBtn").addEventListener("click", async () => {
 
   if (!confirmReset) return;
 
+  await client
+    .from("playerGames")
+    .delete()
+    .eq("playerId", localStorage.getItem("playerId"))
+    .eq("date", selectedDate);
   // clear runtime state
   guesses = [];
   matches = [];
@@ -790,11 +942,7 @@ document.getElementById("resetGameBtn").addEventListener("click", async () => {
   gameOutcome = null;
   gameLocked = false;
 
-  // clear saved data
-  localStorage.removeItem(`mlb-guesses`);
-  localStorage.removeItem(`mlb-win`);
-  localStorage.removeItem(`mlb_outcome_${selectedDate}`);
-  localStorage.removeItem(`${GAME_KEY}-guesses`);
+  localStorage.removeItem(`mlb_outcome_${selectedDate}`);;
 
   // reset UI
   input.value = "";
@@ -1032,7 +1180,7 @@ function getGuessStats() {
 (async function boot() {
   loadOutcomeLock();
   resetIfNewGame();
-  loadGame();
+  await loadPlayerGame();
 
   const generatedGame = getGameForDate(selectedDate);
 
