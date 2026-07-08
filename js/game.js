@@ -76,14 +76,16 @@ window.addPlayerGame = async function (
 
   const { data, error } = await client
     .from("playerGames")
-    .insert({
-      date,
-      playerId,
-      guesses,
-      guessesNumber,
-      win,
-      completed,
-      completedSameDay
+    .upsert({
+        playerId,
+        date,
+        guesses,
+        guessesNumber,
+        win,
+        completed,
+        completedSameDay
+    }, {
+        onConflict: "playerId,date"
     })
     .select()
     .single();
@@ -324,9 +326,8 @@ function getSelectedDate() {
   return getEasternDateString();
 }
 
-
 async function saveGame() {
-  
+
   console.log("statusGameCompleted:", statusGameCompleted);
   console.log("selectedDate:", selectedDate);
   console.log("today:", getEasternDateString());
@@ -343,32 +344,16 @@ async function saveGame() {
         : "false"
   };
 
-  if (!playerGame) {
+  playerGame = await addPlayerGame(
+    selectedDate,
+    gameData.guesses,
+    gameData.guessesNumber,
+    gameData.win,
+    gameData.completed,
+    gameData.completedSameDay
+  );
 
-    playerGame = await addPlayerGame(
-      selectedDate,
-      gameData.guesses,
-      gameData.guessesNumber,
-      gameData.win,
-      gameData.completed,
-      gameData.completedSameDay
-    );
-
-    console.log("Game Added.");
-
-  } else {
-
-    playerGame = await updatePlayerGame(
-      selectedDate,
-      gameData.guesses,
-      gameData.guessesNumber,
-      gameData.win,
-      gameData.completed,
-      gameData.completedSameDay
-    );
-
-    console.log("Game Updated.");
-  }
+  console.log("Game Saved.");
 }
 
 /* =========================
