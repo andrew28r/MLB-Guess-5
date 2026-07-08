@@ -188,7 +188,6 @@ let gameOutcome = null;
 
 let hintedPlayer = null;
 let hintClickCount = 0;
-let testDayOffset = 0;
 let GAME;
 
 
@@ -900,57 +899,30 @@ function renderLastGuess() {
 /* =========================
    DOCUMENT EVENTS
 ========================= */
-document.getElementById("testGameBtn").addEventListener("click", async () => {
-  testDayOffset++;
+document.getElementById("testGameBtn").addEventListener("click", () => {
+  console.log("BUTTON CLICKED");
 
-  const base = new Date(getEasternDateString());
-  base.setDate(base.getDate() + testDayOffset);
+  const [year, month, day] = selectedDate.split("-").map(Number);
 
-  const year = base.getFullYear();
-  const month = String(base.getMonth() + 1).padStart(2, "0");
-  const day = String(base.getDate()).padStart(2, "0");
+  const base = new Date(year, month - 1, day);
 
-  const nextDate = `${year}-${month}-${day}`;
+  base.setDate(base.getDate() + 1);
 
-  selectedDate = nextDate;
+  const nextDate = formatLocalDate(base);
 
-  gameInfoObj = await generateUniqueGame(selectedDate);
+  console.log("Current page date:", selectedDate);
+  console.log("Next date:", nextDate);
 
-  const { error } = await client
-    .from("games")
-    .upsert(
-      {
-        date: selectedDate,
-        gameinfo: gameInfoObj
-      },
-      {
-        onConflict: "date"
-      }
-    );
-
-  if (error) {
-    console.error("Failed to save test game:", error);
-  }
-
-  GAME = gameInfoObj;
-
-  matches = [];
-  leaderboard = [];
-
-  gameOutcome = null;
-  gameLocked = false;
-
-  await loadPlayerGame();
-
-  input.disabled = false;
-  input.placeholder = "Guess a player...";
-
-  input.value = "";
-  message.textContent = "";
-  hint.textContent = "";
-
-  await loadLeaderboard();
+  window.location.href = `game.html?date=${nextDate}`;
 });
+
+function formatLocalDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
 
 document.getElementById("resetGameBtn").addEventListener("click", async () => {
   const confirmReset = confirm("Reset current game data?");
