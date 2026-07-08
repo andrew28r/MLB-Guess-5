@@ -646,6 +646,9 @@ async function checkWin() {
 
   await saveGame();
 
+
+  stopAutoSave();
+
   applyLockUI();
   openPopup();
 }
@@ -724,6 +727,9 @@ async function openGiveUpPopup() {
   gameLocked = true;
 
   await saveGame(); // <-- ADD THIS
+
+  
+  stopAutoSave();
   applyLockUI();
 
   const { green, yellow, red, gray } = getGuessStats();
@@ -1227,6 +1233,7 @@ function getGuessStats() {
 
     await loadLeaderboard();  // leaderboard will render using those guesses
 
+    startAutoSave();
 
     console.log("Boot finished");
   } catch (err) {
@@ -1237,8 +1244,17 @@ function getGuessStats() {
   }
 })();
 
-setInterval(() => {
-  if (guesses.length > 0 && !gameLocked) {
-    saveGame();
-  }
-}, 10000);
+
+let autoSaveInterval;
+
+function startAutoSave() {
+  autoSaveInterval = setInterval(() => {
+    if (guesses.length > 0) {
+      saveGame();
+    }
+  }, 10000);
+}
+
+function stopAutoSave() {
+  clearInterval(autoSaveInterval);
+}
