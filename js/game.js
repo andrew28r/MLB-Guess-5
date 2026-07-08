@@ -1236,3 +1236,9 @@ function getGuessStats() {
     message.textContent = err.message;
   }
 })();
+
+setInterval(() => {
+  if (guesses.length > 0 && !gameLocked) {
+    saveGame();
+  }
+}, 10000);
