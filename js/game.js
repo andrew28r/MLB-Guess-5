@@ -405,13 +405,24 @@ function getSelectedDate() {
 
 async function saveGame() {
   playerGame = await playerGames(selectedDate);
-
+  
+  
+  console.log("statusGameCompleted:", statusGameCompleted);
+  console.log("selectedDate:", selectedDate);
+  console.log("today:", getEasternDateString());
+  console.log(
+    "completedSameDay:",
+    statusGameCompleted === "true" &&
+    selectedDate === getEasternDateString()
+  );
+  
   const gameData = {
     guesses: JSON.stringify(guesses),
     guessesNumber: String(guesses.length),
     win: String(statusGameWin),
     completed: String(statusGameCompleted),
     completedSameDay:
+      statusGameCompleted === "true" &&
       selectedDate === getEasternDateString()
         ? "true"
         : "false"
