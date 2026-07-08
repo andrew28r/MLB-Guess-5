@@ -413,7 +413,7 @@ button:hover {
 }
 
 /* ❌ not completed */
-.day-btn.incomplete {
+.day-btn.notStarted {
   background: #ddd;
   color: #777;
   border-color: #ccc;
@@ -422,6 +422,11 @@ button:hover {
   background: #af4c4c;
   color: white;
   border-color: #af4c4c;
+}
+.day-btn.incomplete {
+  background: #c7a74e;
+  color: white;
+  border-color: #c7a74e;
 }
 
 

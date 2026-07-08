@@ -158,14 +158,20 @@ async function loadDayButtons() {
 
     const game = games.find(g => g.date === iso);
 
-
-    if (game?.win === "true") {
+    if (!game) {
+      // No game played
+      btn.classList.add("notStarted");
+    }
+    else if (game.win === "true") {
+      // Won
       btn.classList.add("completed");
-    } 
-    else if (game?.completed === "true") {
+    }
+    else if (game.completed === "true") {
+      // Gave up / failed
       btn.classList.add("failed");
-    } 
+    }
     else {
+      // Has guesses but not finished
       btn.classList.add("incomplete");
     }
 
