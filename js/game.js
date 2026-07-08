@@ -823,15 +823,14 @@ function getGameForDate(dateString) {
 }
 
 async function generateUniqueGame(dateString) {
-  const baseSeed = getEasternDayNumberFromDate(dateString);
+
+  const baseSeed = Math.floor(Math.random() * 1000000000);
 
   const { data, error } = await client
     .from("games")
     .select("gameinfo");
 
-  if (error) {
-    throw error;
-  }
+  if (error) throw error;
 
   const used = new Set();
 
@@ -856,9 +855,8 @@ async function generateUniqueGame(dateString) {
     offset++;
   }
 
-  throw new Error("Could not generate a unique game.");
+  throw new Error("Could not generate unique game.");
 }
-
 
 /* =========================
    RENDER
@@ -1208,7 +1206,7 @@ function getGuessStats() {
     } else {
       console.log("Generating new game...");
 
-      const generatedGame = await generateUniqueGame(selectedDate);
+      const generatedGame = await generateUniqueGame(selectedDate, crypto.randomInt);
 
       const { error: insertError } = await client
         .from("games")
