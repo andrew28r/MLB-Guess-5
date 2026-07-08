@@ -928,41 +928,6 @@ function formatLocalDate(date) {
   return `${year}-${month}-${day}`;
 }
 
-document.getElementById("resetGameBtn").addEventListener("click", async () => {
-  const confirmReset = confirm("Reset current game data?");
-
-  if (!confirmReset) return;
-
-  await client
-    .from("playerGames")
-    .delete()
-    .eq("playerId", localStorage.getItem("playerId"))
-    .eq("date", selectedDate);
-
-  statusGameWin = "false";
-  statusGameCompleted = "false";
-  playerGame = null;
-
-  // clear runtime state
-  guesses = [];
-  matches = [];
-  leaderboard = [];
-
-  gameOutcome = null;
-  gameLocked = false;
-
-  // reset UI
-  input.value = "";
-  message.textContent = "";
-  hint.textContent = "";
-
-  input.disabled = false;
-  input.placeholder = "Guess a player...";
-
-  await loadLeaderboard();
-  render();
-  renderLastGuess();
-});
 
 function getPlayerId() {
     return localStorage.getItem("playerId");
