@@ -12,7 +12,7 @@ let statusGameWin = "false";
 let statusGameCompleted = "false";
 
 window.playerGames = async function (date) {
-  const playerId = localStorage.getItem("playerId");
+  const playerId = getPlayerId();
   console.log(playerId);
 
   if (!playerId) return null;
@@ -31,25 +31,6 @@ window.playerGames = async function (date) {
 
   return data;
 };
-/*
-(async () => {
-    playerGame = await playerGames(selectedDate);
-    console.log(playerGame);
-
-    if (playerGame) {
-        guesses = JSON.parse(playerGame.guesses);
-
-        statusGameWin = playerGame.win || "false";
-        statusGameCompleted = playerGame.completed || "false";
-    } else {
-        guesses = [];
-        statusGameWin = "false";
-        statusGameCompleted = "false";
-    }
-
-    console.log("Loaded guesses:", guesses);
-})();
-*/
 
 async function loadPlayerGame() {
   playerGame = await playerGames(selectedDate);
@@ -74,7 +55,6 @@ async function loadPlayerGame() {
   console.log("Loaded guesses:", guesses);
 }
 
-
 window.addPlayerGame = async function (
   date,
   guesses = "",
@@ -83,7 +63,7 @@ window.addPlayerGame = async function (
   completed = "",
   completedSameDay = ""
 ) {
-  const playerId = localStorage.getItem("playerId");
+  const playerId = getPlayerId();
   if (!playerId) return null;
 
   const { data, error } = await client
@@ -117,7 +97,7 @@ window.updatePlayerGame = async function (
   completed,
   completedSameDay
 ) {
-  const playerId = localStorage.getItem("playerId");
+  const playerId = getPlayerId();
   if (!playerId) return null;
 
   const { data, error } = await client
@@ -277,72 +257,6 @@ function getGameSignature(game) {
 }
 
 
-function getGameForDate(dateString) {
-  const seed = getEasternDayNumberFromDate(dateString);
-
-  const r1 = seededRandom(seed);
-  const r2 = seededRandom(seed + 1);
-  const r3 = seededRandom(seed + 2);
-  const r4 = seededRandom(seed + 3);
-  const r5 = seededRandom(seed + 4);
-
-  const isTeamGame = r1 < 0.35;
-
-  const team = isTeamGame
-    ? TEAMS[Math.floor(r2 * TEAMS.length)]
-    : null;
-      
-  let availableStats = STATS;
-
-  if (isTeamGame) {
-    // example rule: exclude stats that are not allowed for team season games
-    availableStats = STATS.filter(s => s.includeTeamSeason !== false);
-  }
-
-  const stat = availableStats[Math.floor(r3 * availableStats.length)];
-
-  let game = {
-    group: stat.group,
-    sortStat: stat.stat
-  };
-
-  if (isTeamGame) {
-    game.teamId = team.id;
-    game.teamName = team.name;
-  }
-
-  if (r4 < 0.33) {
-    game.stats = "career";
-    game.title = isTeamGame
-      ? `Most Career ${stat.title} for ${team.name}`
-      : `Most Career ${stat.title}`;
-  }
-
-  else if (r4 < 0.66) {
-    const year = YEARS[Math.floor(r5 * YEARS.length)];
-
-    game.stats = "season";
-    game.season = year;
-
-    game.title = isTeamGame
-      ? `Most ${stat.title} in ${year} for ${team.name}`
-      : `Most ${stat.title} in ${year}`;
-  }
-
-  else {
-    const decade = DECADES[Math.floor(r5 * DECADES.length)];
-
-    game.stats = "byDateRange";
-    game.startDate = `${decade}-01-01`;
-    game.endDate = `${decade + 9}-12-31`;
-
-    game.title = isTeamGame
-      ? `Most ${stat.title} in the ${decade}s for ${team.name}`
-      : `Most ${stat.title} in the ${decade}s`;
-  }
-
-  return game;
-}
 
 /* =========================
    SEED SYSTEM
@@ -457,21 +371,6 @@ async function saveGame() {
    RESET DAILY GAME
 ========================= */
 
-function resetIfNewGame() {
-  const currentGameId = getEasternDayNumber();
-  const savedGameId = localStorage.getItem("mlb-game-id");
-
-  if (savedGameId != currentGameId) {
-    localStorage.setItem("mlb-game-id", currentGameId);
-
-    localStorage.removeItem(`${GAME_KEY}-guesses`);
-    localStorage.removeItem(`${GAME_KEY}-win`);
-    localStorage.removeItem("mlb-win");
-
-    hint.textContent = "";
-    guesses = [];
-  }
-}
 
 function getEasternDayNumberFromDate(dateString) {
   const date = new Date(dateString);
@@ -535,9 +434,15 @@ async function loadLeaderboard() {
   hintClickCount = 0;
   
   render();
-  lastGuess.innerHTML = "";
-  guessCounter.textContent = `Guesses: ${guesses.length}`;
 
+  if (statusGameCompleted !== "true") {
+    renderLastGuess();
+  } else {
+    lastGuess.innerHTML = "";
+  }
+
+  guessCounter.textContent = `Guesses: ${guesses.length}`;
+  
   if (leaderboard.length) checkWin();
 }
 
@@ -700,13 +605,13 @@ async function guessPlayer() {
   render();
   guessCounter.textContent = `Guesses: ${guesses.length}`;
 
-  checkWin();
+  await checkWin();
   renderLastGuess();
 
   input.value = "";
   dropdown.style.display = "none";
   
-  saveGame();
+  await saveGame();
 }
 
 async function validatePlayerName(name) {
@@ -726,7 +631,7 @@ async function validatePlayerName(name) {
   return match || null;
 }
 
-function checkWin() {
+async function checkWin() {
   // Game already finished
   if (gameLocked || statusGameCompleted === "true") return;
 
@@ -755,9 +660,7 @@ function checkWin() {
   statusGameCompleted = "true";
   gameLocked = true;
 
-  saveGame();
-
-  localStorage.setItem(`mlb_outcome_${selectedDate}`, "win");
+  await saveGame();
 
   applyLockUI();
   openPopup();
@@ -1081,8 +984,6 @@ document.getElementById("resetGameBtn").addEventListener("click", async () => {
   gameOutcome = null;
   gameLocked = false;
 
-  localStorage.removeItem(`mlb_outcome_${selectedDate}`);;
-
   // reset UI
   input.value = "";
   message.textContent = "";
@@ -1095,6 +996,10 @@ document.getElementById("resetGameBtn").addEventListener("click", async () => {
   render();
   renderLastGuess();
 });
+
+function getPlayerId() {
+    return localStorage.getItem("playerId");
+}
 
 document.getElementById("backBtn").onclick = () => {
     window.location.href = "index.html";
@@ -1263,13 +1168,6 @@ document.getElementById("giveUpBtn").addEventListener("click", () => {
 
 
 
-function loadOutcomeLock() {
-  const outcome = localStorage.getItem(`mlb_outcome_${selectedDate}`);
-
-  if (outcome === "win" || outcome === "giveup") {
-    gameLocked = true;
-  }
-}
 
 function applyLockUI() {
   if (gameLocked) {
@@ -1320,11 +1218,6 @@ function getGuessStats() {
   try {
     console.log("Boot started");
 
-    loadOutcomeLock();
-    resetIfNewGame();
-
-    await loadPlayerGame();
-
     console.log("Checking today's game...");
 
     const { data: todaysGame, error } = await client
@@ -1367,11 +1260,10 @@ function getGuessStats() {
 
     GAME = gameInfoObj;
 
-    console.log("Loading leaderboard...");
+    await loadPlayerGame();   // <-- load saved guesses first
 
-    await loadLeaderboard();
+    await loadLeaderboard();  // leaderboard will render using those guesses
 
-    applyLockUI();
 
     console.log("Boot finished");
   } catch (err) {
