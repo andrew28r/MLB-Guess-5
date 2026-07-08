@@ -10,6 +10,7 @@ let gameInfoObj;
 let playerGame;
 let statusGameWin = "false";
 let statusGameCompleted = "false";
+let statusCompletedSameDay = "false";
 
 window.playerGames = async function (date) {
   const playerId = getPlayerId();
@@ -32,26 +33,33 @@ window.playerGames = async function (date) {
   return data;
 };
 
+
 async function loadPlayerGame() {
   playerGame = await playerGames(selectedDate);
 
   if (playerGame) {
+
     guesses = playerGame.guesses
       ? JSON.parse(playerGame.guesses)
       : [];
 
     statusGameWin = playerGame.win || "false";
     statusGameCompleted = playerGame.completed || "false";
+    statusCompletedSameDay = playerGame.completedSameDay || "false";
+
   } else {
+
     guesses = [];
     statusGameWin = "false";
     statusGameCompleted = "false";
+
   }
 
   if (statusGameCompleted === "true") {
     gameLocked = true;
-    applyLockUI()
+    applyLockUI();
   }
+
   console.log("Loaded guesses:", guesses);
 }
 
@@ -187,10 +195,10 @@ let GAME;
    CONFIG
 ========================= */
 const TEAMS = [
-  //{ id: 109, name: "Arizona Diamondbacks" },
+  { id: 109, name: "Arizona Diamondbacks" },
   { id: 144, name: "Atlanta Braves" },
   { id: 147, name: "New York Yankees" },
-  /*{ id: 110, name: "Baltimore Orioles" },
+  { id: 110, name: "Baltimore Orioles" },
   { id: 111, name: "Boston Red Sox" },
   { id: 112, name: "Chicago Cubs" },
   { id: 145, name: "Chicago White Sox" },
@@ -215,7 +223,7 @@ const TEAMS = [
   { id: 139, name: "Tampa Bay Rays" },
   { id: 140, name: "Texas Rangers" },
   { id: 141, name: "Toronto Blue Jays" },
-  { id: 120, name: "Washington Nationals" }*/
+  { id: 120, name: "Washington Nationals" }
 ];
 
 const STATS = [
@@ -318,18 +326,11 @@ function getSelectedDate() {
 
 
 async function saveGame() {
-  playerGame = await playerGames(selectedDate);
-  
   
   console.log("statusGameCompleted:", statusGameCompleted);
   console.log("selectedDate:", selectedDate);
   console.log("today:", getEasternDateString());
-  console.log(
-    "completedSameDay:",
-    statusGameCompleted === "true" &&
-    selectedDate === getEasternDateString()
-  );
-  
+
   const gameData = {
     guesses: JSON.stringify(guesses),
     guessesNumber: String(guesses.length),
@@ -343,7 +344,8 @@ async function saveGame() {
   };
 
   if (!playerGame) {
-    await addPlayerGame(
+
+    playerGame = await addPlayerGame(
       selectedDate,
       gameData.guesses,
       gameData.guessesNumber,
@@ -353,8 +355,10 @@ async function saveGame() {
     );
 
     console.log("Game Added.");
+
   } else {
-    await updatePlayerGame(
+
+    playerGame = await updatePlayerGame(
       selectedDate,
       gameData.guesses,
       gameData.guessesNumber,
@@ -435,11 +439,7 @@ async function loadLeaderboard() {
   
   render();
 
-  if (statusGameCompleted !== "true") {
-    renderLastGuess();
-  } else {
-    lastGuess.innerHTML = "";
-  }
+  lastGuess.innerHTML = "";
 
   guessCounter.textContent = `Guesses: ${guesses.length}`;
   
@@ -949,12 +949,13 @@ document.getElementById("testGameBtn").addEventListener("click", async () => {
 
   GAME = gameInfoObj;
 
-  guesses = [];
   matches = [];
   leaderboard = [];
 
   gameOutcome = null;
   gameLocked = false;
+
+  await loadPlayerGame();
 
   input.disabled = false;
   input.placeholder = "Guess a player...";
@@ -976,6 +977,11 @@ document.getElementById("resetGameBtn").addEventListener("click", async () => {
     .delete()
     .eq("playerId", localStorage.getItem("playerId"))
     .eq("date", selectedDate);
+
+  statusGameWin = "false";
+  statusGameCompleted = "false";
+  playerGame = null;
+
   // clear runtime state
   guesses = [];
   matches = [];
