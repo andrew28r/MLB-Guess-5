@@ -481,36 +481,52 @@ button:hover {
   text-align: left;
 }
 
-.game-info {
-  display: flex;
-  align-items: flex-end;
-  gap: 18px;
-}
-
 .game-date {
   font-size: 18px;
   font-weight: bold;
   line-height: 1;
 }
+.game-info {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
 
 .guess-info {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 4px;
 }
 
 .guess-label {
   font-size: 14px;
   color: #666;
-  padding-bottom: 0px;
+  line-height: 18px;
+  align-self: flex-end;
+  transform: translateY(1px);
 }
 
 .guess-number {
   font-size: 18px;
   font-weight: bold;
-  line-height: 1;
+  line-height: 18px;
 }
-/*
+
+#lastGuess:empty {
+  display: none;
+}
+
 body {
-    font-family: "Nunito", sans-serif;
-}*/
+  font-family: "Nunito", sans-serif;
+  font-weight: 400;
+}
+
+button {
+  font-family: "Nunito", sans-serif;
+  font-weight: 600;
+}
+
+h1, h2, h3 {
+  font-family: "Nunito", sans-serif;
+  font-weight: 700;
+}
