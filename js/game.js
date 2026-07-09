@@ -5,6 +5,15 @@ const client = supabase.createClient(supabaseUrl, supabaseKey);
 
 
 let selectedDate = getSelectedDate();
+
+const [year, month, day] = selectedDate.split("-");
+document.getElementById("gameDate").textContent = `${month}/${day}/${year}`;
+
+/*const [year, month, day] = selectedDate.split("-");
+
+document.getElementById("gameDate").textContent =
+  `${Number(month)}/${Number(day)}/${year}`;*/
+
 let gameInfoObj;
 
 let playerGame;
@@ -425,7 +434,7 @@ async function loadLeaderboard() {
 
   lastGuess.innerHTML = "";
 
-  guessCounter.textContent = `Guesses: ${guesses.length}`;
+  document.getElementById("guessNumber").textContent = guesses.length;
   
   if (leaderboard.length) checkWin();
 }
@@ -587,7 +596,7 @@ async function guessPlayer() {
   message.textContent = "";
 
   render();
-  guessCounter.textContent = `Guesses: ${guesses.length}`;
+  document.getElementById("guessNumber").textContent = guesses.length;
 
   await checkWin();
   renderLastGuess();

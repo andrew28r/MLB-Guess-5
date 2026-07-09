@@ -480,3 +480,37 @@ button:hover {
   justify-content: space-between;
   text-align: left;
 }
+
+.game-info {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+}
+
+.game-date {
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.guess-info {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.guess-label {
+  font-size: 14px;
+  color: #666;
+  padding-bottom: 0px;
+}
+
+.guess-number {
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 1;
+}
+/*
+body {
+    font-family: "Nunito", sans-serif;
+}*/

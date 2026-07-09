@@ -2,7 +2,9 @@
 <html>
 <head>
   <title>MLB Guess 5</title>
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/game.js" defer></script>
@@ -37,9 +39,18 @@
 
   <div class="input-wrapper">
     <div class="top-input">
-      <div id="guessCounter">Guesses: 0</div>
+      <div class="game-info">
+        <div id="gameDate" class="game-date"></div>
+
+        <div class="guess-info">
+          <span class="guess-label">Guesses:</span>
+          <span id="guessNumber" class="guess-number">0</span>
+        </div>
+      </div>
+
       <div id="hint"></div>
     </div>
+
     <input id="search" placeholder="Guess a player..." autocomplete="off">
     <div id="dropdown" class="dropdown"></div>
 
