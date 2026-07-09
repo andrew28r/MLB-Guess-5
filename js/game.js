@@ -55,6 +55,7 @@ async function loadPlayerGame() {
     statusGameWin = playerGame.win || "false";
     statusGameCompleted = playerGame.completed || "false";
     statusCompletedSameDay = playerGame.completedSameDay || "false";
+    totalHintClicks = Number(playerGame.hintClicks || 0);
 
   } else {
 
@@ -78,7 +79,8 @@ window.addPlayerGame = async function (
   guessesNumber = "0",
   win = "",
   completed = "",
-  completedSameDay = ""
+  completedSameDay = "",
+  hintClicks = "0"
 ) {
   const playerId = getPlayerId();
   if (!playerId) return null;
@@ -92,7 +94,8 @@ window.addPlayerGame = async function (
         guessesNumber,
         win,
         completed,
-        completedSameDay
+        completedSameDay,
+        hintClicks
     }, {
         onConflict: "playerId,date"
     })
@@ -197,6 +200,8 @@ let gameOutcome = null;
 
 let hintedPlayer = null;
 let hintClickCount = 0;
+let totalHintClicks = 0;
+
 let GAME;
 
 
@@ -349,7 +354,8 @@ async function saveGame() {
       statusGameCompleted === "true" &&
       selectedDate === getEasternDateString()
         ? "true"
-        : "false"
+        : "false",
+    hintClicks: String(totalHintClicks)
   };
 
   playerGame = await addPlayerGame(
@@ -358,7 +364,8 @@ async function saveGame() {
     gameData.guessesNumber,
     gameData.win,
     gameData.completed,
-    gameData.completedSameDay
+    gameData.completedSameDay,
+    gameData.hintClicks
   );
 
   console.log("Game Saved.");
@@ -428,7 +435,6 @@ async function loadLeaderboard() {
   }));
 
   gameTitle.textContent = gameInfoObj.title;
-  hintClickCount = 0;
   
   render();
 
@@ -575,9 +581,12 @@ async function guessPlayer() {
     hintedPlayer &&
     validPlayer.fullName.toLowerCase() === hintedPlayer.name.toLowerCase()
   ) {
-    hint.textContent = "";
-    hintedPlayer = null;
-    hintClickCount = 0;
+      hint.textContent = "";
+      hintedPlayer = null;
+      hintClickCount = 0;
+
+      setHintStage(0);
+      clearHintPlayer();
   }
   
   // now check leaderboard AFTER validation
@@ -949,7 +958,7 @@ document.getElementById("backBtn").onclick = () => {
 document.getElementById("menuBtn").onclick = () => {
     menu.classList.toggle("hidden");
 };
-document.getElementById("hintBtn").addEventListener("click", () => {
+document.getElementById("hintBtn").addEventListener("click", async () => {
     const guessed = guesses.map(g => g.name.toLowerCase());
 
     const player = leaderboard
@@ -963,7 +972,14 @@ document.getElementById("hintBtn").addEventListener("click", () => {
     }
 
     hintedPlayer = player;
-    hintClickCount++;
+    setHintPlayer(player);
+
+    hintClickCount++;      // local hint stage
+    totalHintClicks++;     // saved game total
+
+    await saveGame();
+
+    setHintStage(hintClickCount);
 
     const initials = player.name
         .split(" ")
@@ -1152,6 +1168,72 @@ function getGuessStats() {
         gray: 0
     });
 }
+
+function getHintStageKey() {
+  return `hintStage_${selectedDate}`;
+}
+
+function getHintStage() {
+  return Number(localStorage.getItem(getHintStageKey()) || 0);
+  
+}
+
+function setHintStage(value) {
+  localStorage.setItem(getHintStageKey(), value);
+}
+
+function loadHintStage() {
+    const stage = getHintStage();
+
+    if (!stage) return;
+
+    hintedPlayer = getHintPlayer();
+
+    if (!hintedPlayer) return;
+
+    const player = hintedPlayer;
+
+    const initials = player.name
+        .split(" ")
+        .map(n => n[0])
+        .join(".") + ".";
+
+    const isTeamGame = !!GAME.teamId;
+
+    if (stage === 1) {
+        hint.textContent = isTeamGame
+            ? `Hint: ${player.position}`
+            : `Hint: ${player.team}`;
+    } 
+    else if (stage === 2) {
+        hint.textContent = isTeamGame
+            ? `Hint: ${player.position} (${initials})`
+            : `Hint: ${player.team} (${initials})`;
+    }
+}
+
+function getHintPlayerKey() {
+  return `hintPlayer_${selectedDate}`;
+}
+
+function setHintPlayer(player) {
+  localStorage.setItem(
+    getHintPlayerKey(),
+    JSON.stringify(player)
+  );
+}
+
+function getHintPlayer() {
+  const saved = localStorage.getItem(getHintPlayerKey());
+
+  return saved ? JSON.parse(saved) : null;
+}
+
+function clearHintPlayer() {
+  localStorage.removeItem(getHintPlayerKey());
+}
+
+
 /* =========================
    INIT
 ========================= */
@@ -1203,7 +1285,11 @@ function getGuessStats() {
 
     await loadPlayerGame();   // <-- load saved guesses first
 
+    hintClickCount = getHintStage();
+
     await loadLeaderboard();  // leaderboard will render using those guesses
+
+    loadHintStage();
 
     startAutoSave();
 
@@ -1230,3 +1316,4 @@ function startAutoSave() {
 function stopAutoSave() {
   clearInterval(autoSaveInterval);
 }
+
