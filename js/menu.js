@@ -183,7 +183,6 @@ async function loadDayButtons() {
 
 document.addEventListener("DOMContentLoaded", loadDayButtons);
 
-
 function openPopup() {
   const popup = document.getElementById("playerIdPopup");
   const input = document.getElementById("username");
@@ -192,13 +191,34 @@ function openPopup() {
 
   if (playerId) {
     input.value = playerId;
+    popup.dataset.canClose = "true";
   } else {
     input.value = "";
+    popup.dataset.canClose = "false";
   }
 
   popup.style.display = "flex";
 }
 
+function closePopup() {
+  const popup = document.getElementById("playerIdPopup");
+
+  if (popup.dataset.canClose !== "true") return;
+
+  popup.style.display = "none";
+}
+const popup = document.getElementById("playerIdPopup");
+
+popup.addEventListener("click", (e) => {
+  if (e.target === popup) {
+    closePopup();
+  }
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    closePopup();
+  }
+});
 async function submitPlayerId() {
   const username = document.getElementById("username").value.trim();
 
