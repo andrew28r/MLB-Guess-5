@@ -586,7 +586,7 @@ async function guessPlayer() {
       hintClickCount = 0;
 
       setHintStage(0);
-      clearHintPlayer();
+      clearHintData();
   }
   
   // now check leaderboard AFTER validation
@@ -661,6 +661,8 @@ async function checkWin() {
   statusGameWin = "true";
   statusGameCompleted = "true";
   gameLocked = true;
+
+  clearHintData();
 
   await saveGame();
 
@@ -743,6 +745,8 @@ async function openGiveUpPopup() {
   statusGameWin = "false";
   statusGameCompleted = "true";
   gameLocked = true;
+
+  clearHintData();
 
   await saveGame(); // <-- ADD THIS
 
@@ -1233,6 +1237,14 @@ function clearHintPlayer() {
   localStorage.removeItem(getHintPlayerKey());
 }
 
+function clearHintData() {
+  localStorage.removeItem(getHintStageKey());
+  localStorage.removeItem(getHintPlayerKey());
+
+  hintedPlayer = null;
+  hintClickCount = 0;
+  hint.textContent = "";
+}
 
 /* =========================
    INIT
