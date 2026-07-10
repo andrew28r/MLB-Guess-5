@@ -247,6 +247,7 @@ async function submitPlayerId() {
       document.getElementById("playerIdPopup").style.display = "none";
 
       loadDayButtons();
+      loadPlayerStreak();
     };
 
 
@@ -285,3 +286,72 @@ function formatLocalDate(date) {
 
   return `${year}-${month}-${day}`;
 }
+
+async function loadPlayerStreak() {
+  const playerId = localStorage.getItem("playerId");
+
+  if (!playerId) {
+    document.getElementById("streakDisplay").textContent =
+      "Current Streak: Login to view 🔥";
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("playerData")
+    .select("streak")
+    .eq("playerId", playerId)
+    .single();
+
+  if (error) {
+    console.error("Error loading streak:", error);
+    return;
+  }
+
+  const streakDisplay = document.getElementById("streakDisplay");
+
+  streakDisplay.textContent = Number(data.streak) > 0
+    ? `Current Streak: ${data.streak} 🔥`
+    : "";
+}
+
+
+async function loadLeaderboard() {
+
+  const { data, error } = await supabaseClient
+    .from("playerData")
+    .select("playerId, wins")
+    .order("wins", { ascending: false })
+    .limit(5);
+
+  if (error) {
+    console.error("Leaderboard error:", error);
+    document.getElementById("leaderboardList").textContent =
+      "Unable to load leaderboard";
+    return;
+  }
+
+  const leaderboard = document.getElementById("leaderboardList");
+
+  leaderboard.innerHTML = "";
+
+  data.forEach((player, index) => {
+
+    const row = document.createElement("div");
+
+    row.className = "leaderboard-row";
+
+    row.innerHTML = `
+      <span>${index + 1}.</span>
+      <span>${player.playerId}</span>
+      <span>${player.wins}</span>
+    `;
+
+    leaderboard.appendChild(row);
+
+  });
+}
+
+window.addEventListener("load", () => {
+  loadPlayerStreak();
+  loadLeaderboard();
+});

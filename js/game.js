@@ -437,6 +437,8 @@ async function loadLeaderboard() {
 
   gameTitle.textContent = gameInfoObj.title;
   
+  renderStatHeader();
+
   render();
 
   lastGuess.innerHTML = "";
@@ -1429,3 +1431,28 @@ function stopAutoSave() {
   clearInterval(autoSaveInterval);
 }
 
+
+function renderStatHeader() {
+  const header = document.getElementById("statHeader");
+
+  const abbreviations = {
+    homeRuns: "HR",
+    triples: "3B",
+    doubles: "2B",
+    hits: "H",
+    walks: "BB",
+    rbi: "RBI",
+    stolenBases: "SB",
+    wins: "W",
+    strikeOuts: "SO",
+    saves: "SV"
+  };
+
+  const abbr = abbreviations[gameInfoObj.sortStat] || "";
+
+  header.innerHTML = `
+    <div></div>
+    <div></div>
+    <div class="stat-label">${abbr}</div>
+  `;
+}
