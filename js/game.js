@@ -678,8 +678,11 @@ function closePopup() {
   document.getElementById("winPopup").style.display = "none";
 }
 
+
 function shareResults() {
   const { green, yellow, red, gray } = getGuessStats();
+  const [year, month, day] = selectedDate.split("-");
+  const displayDate = `${month}/${day}/${year}`;
 
   const outcomeText =
     gameOutcome === "giveup"
@@ -687,8 +690,8 @@ function shareResults() {
       : "Solved ✅";
 
   const text =
-`MLB Guess 5
-${outcomeText}
+`MLB Guess 5 - ${displayDate}
+
 Total guesses: ${guesses.length}
 🟢 ${green}
 🟡 ${yellow}
@@ -704,6 +707,7 @@ Game: ${GAME.title}`;
       alert("Copy failed");
     });
 }
+
 
 function openPopup() {
   const popup = document.getElementById("winPopup");
@@ -1272,15 +1276,37 @@ async function updateGamesPlayed(playerId) {
   }
 
   // Count current streak (newest -> oldest)
+  const today = new Date().toISOString().split("T")[0];
+
   for (const game of games) {
     const isWin = game.win === true || game.win === "true";
+    const isCompleted = game.completed === true || game.completed === "true";
+    const isGiveup = isCompleted && !isWin;
+
     const completedSameDay =
       game.completedSameDay === true || game.completedSameDay === "true";
 
+    const gameDate = game.date; // expected format: YYYY-MM-DD
+
+    // Giveups reset streak
+    if (isGiveup) {
+      break;
+    }
+
+    // Today's game:
+    // Count only if it is a win, otherwise skip it
+    if (gameDate === today) {
+      if (isWin && completedSameDay) {
+        streak++;
+      }
+      continue;
+    }
+
+    // Previous days count normally
     if (isWin && completedSameDay) {
       streak++;
     } else {
-      break; // first failed game ends streak
+      break;
     }
   }
 
@@ -1332,7 +1358,7 @@ async function updateGamesPlayed(playerId) {
     } else {
       console.log("Generating new game...");
 
-      const generatedGame = await generateUniqueGame(selectedDate, crypto.randomInt);
+      const generatedGame = await generateUniqueGame(selectedDate);
 
       const { error: insertError } = await client
         .from("games")
@@ -1353,17 +1379,34 @@ async function updateGamesPlayed(playerId) {
 
     GAME = gameInfoObj;
 
-    await loadPlayerGame();   // <-- load saved guesses first
+    await loadPlayerGame();
 
     hintClickCount = getHintStage();
 
-    await loadLeaderboard();  // leaderboard will render using those guesses
+    await loadLeaderboard();  // <-- PUT IT RIGHT AFTER THIS
+
+
+    // Restore completed game popup after reload
+    if (statusGameCompleted === "true") {
+      gameLocked = true;
+      applyLockUI();
+
+      if (statusGameWin === "true") {
+        gameOutcome = "win";
+        openPopup();
+      } else {
+        gameOutcome = "giveup";
+        openGiveUpPopup();
+      }
+    }
+
 
     loadHintStage();
 
     startAutoSave();
 
     console.log("Boot finished");
+
   } catch (err) {
     console.error("BOOT FAILED:", err);
 
@@ -1371,7 +1414,6 @@ async function updateGamesPlayed(playerId) {
     message.textContent = err.message;
   }
 })();
-
 
 let autoSaveInterval;
 
