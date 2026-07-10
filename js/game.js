@@ -1248,35 +1248,49 @@ function clearHintData() {
 }
 
 async function updateGamesPlayed(playerId) {
-  // Count total games
-  const { count: gamesCount, error: gamesError } = await client
+  // Get all games newest -> oldest
+  const { data: games, error: gamesError } = await client
     .from("playerGames")
-    .select("*", { count: "exact", head: true })
-    .eq("playerId", playerId);
+    .select("*")
+    .eq("playerId", playerId)
+    .order("date", { ascending: false });
 
   if (gamesError) {
     console.error(gamesError);
     return;
   }
 
-  // Count wins (where win = true)
-  const { count: winsCount, error: winsError } = await client
-    .from("playerGames")
-    .select("*", { count: "exact", head: true })
-    .eq("playerId", playerId)
-    .eq("win", true);
+  let gamesPlayed = games.length;
+  let wins = 0;
+  let streak = 0;
 
-  if (winsError) {
-    console.error(winsError);
-    return;
+  // Count ALL wins
+  for (const game of games) {
+    if (game.win === true || game.win === "true") {
+      wins++;
+    }
+  }
+
+  // Count current streak (newest -> oldest)
+  for (const game of games) {
+    const isWin = game.win === true || game.win === "true";
+    const completedSameDay =
+      game.completedSameDay === true || game.completedSameDay === "true";
+
+    if (isWin && completedSameDay) {
+      streak++;
+    } else {
+      break; // first failed game ends streak
+    }
   }
 
   // Update playerData
   const { error: updateError } = await client
     .from("playerData")
     .update({
-      gamesPlayed: String(gamesCount),
-      wins: String(winsCount)
+      gamesPlayed: String(gamesPlayed),
+      wins: String(wins),
+      streak: String(streak)
     })
     .eq("playerId", playerId);
 
@@ -1285,7 +1299,9 @@ async function updateGamesPlayed(playerId) {
     return;
   }
 
-  console.log(`Updated ${playerId}: ${gamesCount} games played, ${winsCount} wins.`);
+  console.log(
+    `Updated ${playerId}: ${gamesPlayed} games played, ${wins} wins, ${streak} streak`
+  );
 }
 
 /* =========================
