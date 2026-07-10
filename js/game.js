@@ -368,6 +368,7 @@ async function saveGame() {
     gameData.hintClicks
   );
 
+  await updateGamesPlayed(getPlayerId());
   console.log("Game Saved.");
 }
 
@@ -1244,6 +1245,47 @@ function clearHintData() {
   hintedPlayer = null;
   hintClickCount = 0;
   hint.textContent = "";
+}
+
+async function updateGamesPlayed(playerId) {
+  // Count total games
+  const { count: gamesCount, error: gamesError } = await client
+    .from("playerGames")
+    .select("*", { count: "exact", head: true })
+    .eq("playerId", playerId);
+
+  if (gamesError) {
+    console.error(gamesError);
+    return;
+  }
+
+  // Count wins (where win = true)
+  const { count: winsCount, error: winsError } = await client
+    .from("playerGames")
+    .select("*", { count: "exact", head: true })
+    .eq("playerId", playerId)
+    .eq("win", true);
+
+  if (winsError) {
+    console.error(winsError);
+    return;
+  }
+
+  // Update playerData
+  const { error: updateError } = await client
+    .from("playerData")
+    .update({
+      gamesPlayed: String(gamesCount),
+      wins: String(winsCount)
+    })
+    .eq("playerId", playerId);
+
+  if (updateError) {
+    console.error(updateError);
+    return;
+  }
+
+  console.log(`Updated ${playerId}: ${gamesCount} games played, ${winsCount} wins.`);
 }
 
 /* =========================
