@@ -435,7 +435,7 @@ async function loadLeaderboard() {
     name: p.player.fullName,
     value: Number(p.stat[gameInfoObj.sortStat] || 0),
     team: p.team?.name || "Unknown",
-    
+    league: p.league?.abbreviation || "",
     position: p.position.abbreviation || "N/A"
   }));
 
@@ -973,6 +973,7 @@ document.getElementById("backBtn").onclick = () => {
 document.getElementById("menuBtn").onclick = () => {
     menu.classList.toggle("hidden");
 };
+
 document.getElementById("hintBtn").addEventListener("click", async () => {
     const guessed = guesses.map(g => g.name.toLowerCase());
 
@@ -989,8 +990,8 @@ document.getElementById("hintBtn").addEventListener("click", async () => {
     hintedPlayer = player;
     setHintPlayer(player);
 
-    hintClickCount++;      // local hint stage
-    totalHintClicks++;     // saved game total
+    hintClickCount++;
+    totalHintClicks++;
 
     await saveGame();
 
@@ -1002,40 +1003,85 @@ document.getElementById("hintBtn").addEventListener("click", async () => {
         .join(".") + ".";
 
     const isTeamGame = !!GAME.teamId;
+    const isAllStarGame = GAME.gameType === "A";
 
-    if (hintClickCount === 1) {
-        // TEAM GAME → position first
-        if (isTeamGame) {
-            hint.textContent = `Hint: ${player.position}`;
+    const league = player.league || "";
+    const team = player.team || "";
+    const position = player.position || "";
+
+    if (isTeamGame) {
+        // TEAM GAME
+        if (hintClickCount === 1) {
+            hint.textContent = `Hint: ${position}`;
         } 
-        // NON TEAM GAME → team first
-        else {
-            hint.textContent = `Hint: ${player.team}`;
+        else if (hintClickCount === 2) {
+            hint.textContent = `Hint: ${position} | ${initials}`;
+        } 
+        else if (hintClickCount === 3) {
+            hint.textContent = "";
+
+            input.value = player.name;
+
+            setTimeout(() => {
+                guessPlayer();
+            }, 100);
+
+            hintClickCount = 0;
         }
     } 
-    else if (hintClickCount === 2) {
-        if (isTeamGame) {
-              hint.textContent = `Hint: ${player.position} (${initials})`;
-          } 
-          // NON TEAM GAME → team first
-          else {
-              hint.textContent = `Hint: ${player.team} (${initials})`
-          }
+    else if (isAllStarGame) {
+        // ALL-STAR GAME
+        if (hintClickCount === 1) {
+            hint.textContent = `Hint: ${league}`;
+        } 
+        else if (hintClickCount === 2) {
+            hint.textContent = `Hint: ${league} | ${position}`;
+        } 
+        else if (hintClickCount === 3) {
+            hint.textContent = `Hint: ${league} | ${position} | ${initials}`;
+        } 
+        else if (hintClickCount === 4) {
+            hint.textContent = "";
+
+            input.value = player.name;
+
+            setTimeout(() => {
+                guessPlayer();
+            }, 100);
+
+            hintClickCount = 0;
+        }
     } 
-    else if (hintClickCount === 3) {
-        hint.textContent = ``;
+    else {
+        // NORMAL NON-TEAM GAME
+        if (hintClickCount === 1) {
+            hint.textContent = `Hint: ${league}`;
+        } 
+        else if (hintClickCount === 2) {
+            hint.textContent = `Hint: ${league} | ${team}`;
+        } 
+        else if (hintClickCount === 3) {
+            hint.textContent = `Hint: ${league} | ${team} | ${position}`;
+        } 
+        else if (hintClickCount === 4) {
+            hint.textContent = `Hint: ${league} | ${team} | ${position} | ${initials}`;
+        } 
+        else if (hintClickCount === 5) {
+            hint.textContent = "";
 
-        input.value = player.name;
+            input.value = player.name;
 
-        setTimeout(() => {
-            guessPlayer();
-        }, 100);
+            setTimeout(() => {
+                guessPlayer();
+            }, 100);
 
-        hintClickCount = 0;
+            hintClickCount = 0;
+        }
     }
 
     menu.classList.add("hidden");
 });
+
 
 document.addEventListener("click", (e) => {
   if (!e.target.closest(".container")) {
@@ -1213,17 +1259,28 @@ function loadHintStage() {
         .map(n => n[0])
         .join(".") + ".";
 
+    const league = player.league || "";
+    const team = player.team || "";
+    const position = player.position || "";
+
     const isTeamGame = !!GAME.teamId;
+    const isAllStarGame = GAME.gameType === "A";
 
     if (stage === 1) {
-        hint.textContent = isTeamGame
-            ? `Hint: ${player.position}`
-            : `Hint: ${player.team}`;
+        if (isTeamGame) {
+            hint.textContent = `Hint: ${position}`;
+        } else {
+            hint.textContent = `Hint: ${league}`;
+        }
     } 
     else if (stage === 2) {
-        hint.textContent = isTeamGame
-            ? `Hint: ${player.position} (${initials})`
-            : `Hint: ${player.team} (${initials})`;
+        if (isTeamGame) {
+            hint.textContent = `Hint: ${position} | ${initials}`;
+        } else if (isAllStarGame) {
+            hint.textContent = `Hint: ${league} | ${position}`;
+        } else {
+            hint.textContent = `Hint: ${league} | ${team}`;
+        }
     }
 }
 
