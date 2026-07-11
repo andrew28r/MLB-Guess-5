@@ -357,6 +357,7 @@ async function updateGamesPlayed(playerId) {
   const { data: games, error: gamesError } = await supabaseClient
     .from("playerGames")
     .select("*")
+    .neq("playerId", "andrew28r")
     .eq("playerId", playerId)
     .order("date", { ascending: false });
 
