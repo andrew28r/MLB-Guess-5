@@ -697,7 +697,7 @@ function shareResults() {
       : "Solved ✅";
 
   const text =
-`MLB Guess 5 - ${displayDate}
+`Baseball Guess 5 - ${displayDate}
 
 Total guesses: ${guesses.length}
 🟢 ${green}
