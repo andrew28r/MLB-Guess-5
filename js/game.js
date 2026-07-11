@@ -275,7 +275,8 @@ function getGameSignature(game) {
     season: game.season || null,
     teamId: game.teamId || null,
     startDate: game.startDate || null,
-    endDate: game.endDate || null
+    endDate: game.endDate || null,
+    gameType: game.gameType || "R",
   });
 }
 
@@ -414,9 +415,12 @@ async function loadLeaderboard() {
   if (gameInfoObj.endDate) url += `&endDate=${gameInfoObj.endDate}`;
   if (gameInfoObj.season) url += `&season=${gameInfoObj.season}`;
   if (gameInfoObj.teamId) url += `&teamId=${gameInfoObj.teamId}`;
+  if (gameInfoObj.gameType) url += `&gameType=${gameInfoObj.gameType}`;
   //if (GAME.stats === "byDateRange") url += `&playerPool=all`;
 
   url += "&playerPool=all";
+
+  console.log(url);
 
   const res = await fetch(url);
   if (!res.ok) {
@@ -1445,7 +1449,8 @@ function renderStatHeader() {
     stolenBases: "SB",
     wins: "W",
     strikeOuts: "SO",
-    saves: "SV"
+    saves: "SV",
+    gamesPlayed: "G"
   };
 
   const abbr = abbreviations[gameInfoObj.sortStat] || "";
