@@ -662,3 +662,29 @@ h1, h2, h3 {
   text-align: center;
   width: auto;
 }
+
+.result-card {
+  width: 100%;
+  max-width: 300px;
+
+  margin: 12px auto 0;
+  padding: 10px 12px;
+
+  border: 2px solid #c2c2c2;
+  border-radius: 8px;
+
+  background: transparent;
+
+  box-sizing: border-box;
+
+  text-align: center;
+
+  display: none;
+}
+
+
+.result-card h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 700;
+}

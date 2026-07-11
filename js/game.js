@@ -680,6 +680,7 @@ async function checkWin() {
   openPopup();
 }
 
+
 function closePopup() {
   document.getElementById("winPopup").style.display = "none";
 }
@@ -742,7 +743,7 @@ function openPopup() {
     </div>
   `;
 
-  popup.style.display = "flex";
+  popup.style.display = "block";
 }
 
 async function openGiveUpPopup() {
@@ -785,7 +786,7 @@ async function openGiveUpPopup() {
     </div>
   `;
 
-  popup.style.display = "flex";
+  popup.style.display = "block";
 }
 
 
@@ -1137,7 +1138,7 @@ input.addEventListener("keydown", (e) => {
 
 function openLeaderboard() {
   // close win popup
-  document.getElementById("winPopup").style.display = "none";
+  //document.getElementById("winPopup").style.display = "none";
 
   const popup = document.getElementById("leaderboardPopup");
   const list = document.getElementById("leaderboardList");

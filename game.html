@@ -57,26 +57,28 @@
     <div id="message" class="message"></div>
   </div>
 
+
+  <div id="winPopup" class="result-card">
+
+    <h3 id="winTitle">You Win!</h3>
+
+    <div id="scoreStats" class="score-stats"></div>
+
+    <button onclick="shareResults()">Share Results</button>
+    <!--<button onclick="closePopup()">Close</button>-->
+
+    <button class="leaderboard-btn" onclick="openLeaderboard()">
+      View Leaderboard
+    </button>
+
+  </div>
+
   <div id="statHeader" class="stat-header"></div>
 
   <div id="lastGuess" class="board"></div>
   <div id="board" class="board"></div>
 </div>
 
-<div id="winPopup" class="popup">
-  <div class="popup-content">
-
-    <h2 id="winTitle">You Win!</h2>
-
-    <div id="scoreStats" class="score-stats"></div>
-
-    <button onclick="shareResults()">Share Results</button>
-    <button onclick="closePopup()">Close</button>
-
-    <button class="leaderboard-btn" onclick="openLeaderboard()">View Leaderboard</button>
-
-  </div>
-</div>
 
 
 <div id="leaderboardPopup" class="popup">
