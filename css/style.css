@@ -708,7 +708,7 @@ h1, h2, h3 {
   margin-top: -15px;   /* pushes header closer to title */
   margin-bottom: 8px;
 
-  padding: 0 4px;
+  padding: 0 10px;
 
   border-bottom: none; /* removes line */
 
