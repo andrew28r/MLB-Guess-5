@@ -701,7 +701,7 @@ h1, h2, h3 {
 /* Popup stat header */
 #leaderboardStatHeader {
   display: grid;
-  grid-template-columns: 28px 1fr 45px;
+  grid-template-columns: 40px 1fr 45px;
 
   align-items: center;
 
