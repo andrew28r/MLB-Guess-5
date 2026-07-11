@@ -351,7 +351,94 @@ async function loadLeaderboard() {
   });
 }
 
-window.addEventListener("load", () => {
+
+async function updateGamesPlayed(playerId) {
+  // Get all games newest -> oldest
+  const { data: games, error: gamesError } = await supabaseClient
+    .from("playerGames")
+    .select("*")
+    .eq("playerId", playerId)
+    .order("date", { ascending: false });
+
+  if (gamesError) {
+    console.error(gamesError);
+    return;
+  }
+
+  let gamesPlayed = games.length;
+  let wins = 0;
+  let streak = 0;
+
+  // Count ALL wins
+  for (const game of games) {
+    if (game.win === true || game.win === "true") {
+      wins++;
+    }
+  }
+
+  // Count current streak (newest -> oldest)
+  const today = new Date().toISOString().split("T")[0];
+
+  for (const game of games) {
+    const isWin = game.win === true || game.win === "true";
+    const isCompleted = game.completed === true || game.completed === "true";
+    const isGiveup = isCompleted && !isWin;
+
+    const completedSameDay =
+      game.completedSameDay === true || game.completedSameDay === "true";
+
+    const gameDate = game.date; // expected format: YYYY-MM-DD
+
+    // Giveups reset streak
+    if (isGiveup) {
+      break;
+    }
+
+    // Today's game:
+    // Count only if it is a win, otherwise skip it
+    if (gameDate === today) {
+      if (isWin && completedSameDay) {
+        streak++;
+      }
+      continue;
+    }
+
+    // Previous days count normally
+    if (isWin && completedSameDay) {
+      streak++;
+    } else {
+      break;
+    }
+  }
+
+  // Update playerData
+  const { error: updateError } = await supabaseClient
+    .from("playerData")
+    .update({
+      gamesPlayed: String(gamesPlayed),
+      wins: String(wins),
+      streak: String(streak)
+    })
+    .eq("playerId", playerId);
+
+  if (updateError) {
+    console.error(updateError);
+    return;
+  }
+
+  console.log(
+    `Updated ${playerId}: ${gamesPlayed} games played, ${wins} wins, ${streak} streak`
+  );
+}
+
+
+window.addEventListener("load", async () => {
+  const playerId = localStorage.getItem("playerId");
+
+  if (playerId) {
+    await updateGamesPlayed(playerId);
+  }
+
   loadPlayerStreak();
   loadLeaderboard();
 });
