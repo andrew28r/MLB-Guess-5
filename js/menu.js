@@ -320,6 +320,7 @@ async function loadLeaderboard() {
   const { data, error } = await supabaseClient
     .from("playerData")
     .select("playerId, wins")
+    .neq("playerId", "andrew28r")
     .order("wins", { ascending: false })
     .limit(5);
 
@@ -357,7 +358,6 @@ async function updateGamesPlayed(playerId) {
   const { data: games, error: gamesError } = await supabaseClient
     .from("playerGames")
     .select("*")
-    .neq("playerId", "andrew28r")
     .eq("playerId", playerId)
     .order("date", { ascending: false });
 
