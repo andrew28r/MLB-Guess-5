@@ -1523,5 +1523,5 @@ function renderStatHeader() {
 
   document.getElementById("statHeader").innerHTML = html;
 
-  document.getElementById("leaderboardStatHeader").innerHTML = html;
+  //document.getElementById("leaderboardStatHeader").innerHTML = html;
 }
