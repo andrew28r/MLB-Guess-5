@@ -724,3 +724,19 @@ h1, h2, h3 {
   text-align: center;
 }
 
+
+.result-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.result-buttons button {
+  flex: 1;
+  max-width: 140px;
+
+  padding: 8px 10px;
+  font-size: 14px;
+  min-height: 40px;
+}
