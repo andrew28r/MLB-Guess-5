@@ -1152,6 +1152,9 @@ function openLeaderboard() {
 
   list.innerHTML = "";
 
+  document.getElementById("leaderboardTitle").textContent =
+  gameInfoObj.title;
+
   sorted.forEach(p => {
     list.appendChild(createLeaderboardRow(p));
   });
@@ -1495,7 +1498,6 @@ function stopAutoSave() {
 
 
 function renderStatHeader() {
-  const header = document.getElementById("statHeader");
 
   const abbreviations = {
     homeRuns: "HR",
@@ -1513,9 +1515,13 @@ function renderStatHeader() {
 
   const abbr = abbreviations[gameInfoObj.sortStat] || "";
 
-  header.innerHTML = `
+  const html = `
     <div></div>
     <div></div>
     <div class="stat-label">${abbr}</div>
   `;
+
+  document.getElementById("statHeader").innerHTML = html;
+
+  document.getElementById("leaderboardStatHeader").innerHTML = html;
 }

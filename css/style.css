@@ -1,6 +1,7 @@
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: "Nunito", sans-serif;
+  font-weight: 400;
   background: #e9ecef;
 
   display: flex;
@@ -122,11 +123,7 @@ input:focus {
   -webkit-overflow-scrolling: touch;
 }
 
-.item {
-  padding: 12px;
-  cursor: pointer;
-  border-bottom: 1px solid #eee;
-}
+
 
 .item:hover {
   background: #f0f6ff;
@@ -185,17 +182,20 @@ input:focus {
 /* ---------- Buttons ---------- */
 
 button {
+  font-family: "Nunito", sans-serif;
+  font-weight: 600;
+
   background: #007bff;
   color: white;
 
   border: none;
   padding: 14px 18px;
+
   font-size: 16px;
-
   border-radius: 12px;
-  cursor: pointer;
 
-  min-height: 44px; /* iPhone touch target */
+  cursor: pointer;
+  min-height: 44px;
 }
 
 button:hover {
@@ -380,7 +380,11 @@ button:hover {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 6px;
+
+  padding: 8px 12px;
+
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
 }
 
 .dropdown-headshot {
@@ -460,16 +464,7 @@ button:hover {
     display: block;
 }
 
-.leaderboard-list {
-  max-height: 60vh;        /* limits height to viewport */
-  overflow-y: auto;        /* enables scrolling */
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding-right: 6px;      /* prevents scrollbar overlapping text */
-  -webkit-overflow-scrolling: touch;
-  margin-bottom: 18px;
-}
+
 .leaderboard-popup h2 {
   position: sticky;
   top: 0;
@@ -516,15 +511,6 @@ button:hover {
   display: none;
 }
 
-body {
-  font-family: "Nunito", sans-serif;
-  font-weight: 400;
-}
-
-button {
-  font-family: "Nunito", sans-serif;
-  font-weight: 600;
-}
 
 h1, h2, h3 {
   font-family: "Nunito", sans-serif;
@@ -688,3 +674,53 @@ h1, h2, h3 {
   font-size: 16px;
   font-weight: 700;
 }
+
+
+#leaderboardStatHeader .stat-label {
+  text-align: right;
+  width: 40px;
+}
+
+
+.leaderboard-list {
+  max-height: 60vh;
+  overflow-y: auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  padding-right: 0;
+  margin-bottom: 18px;
+
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+}
+
+
+/* Popup stat header */
+#leaderboardStatHeader {
+  display: grid;
+  grid-template-columns: 28px 1fr 45px;
+
+  align-items: center;
+
+  margin-top: -15px;   /* pushes header closer to title */
+  margin-bottom: 8px;
+
+  padding: 0 4px;
+
+  border-bottom: none; /* removes line */
+
+  font-size: 11px;
+  font-weight: 700;
+  color: #777;
+  text-transform: uppercase;
+}
+
+
+/* Keep stat value aligned with rows */
+#leaderboardStatHeader .stat-label {
+  text-align: center;
+}
+
