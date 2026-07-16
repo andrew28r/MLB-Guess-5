@@ -143,7 +143,7 @@ async function fetchLeaderboard(gameInfoObj){
 
     team:p.team?.name || "Unknown",
 
-    league:p.league?.abbreviation || "",
+    league: getLeagueAbbreviation(p.league?.name),
 
     position:p.position?.abbreviation || "N/A"
 
@@ -151,7 +151,12 @@ async function fetchLeaderboard(gameInfoObj){
 
 }
 
+function getLeagueAbbreviation(league) {
+  if (league === "National League") return "NL";
+  if (league === "American League") return "AL";
 
+  return league || "";
+}
 
 
 /* =========================
