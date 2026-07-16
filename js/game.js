@@ -1,9 +1,3 @@
-const supabaseUrl = "https://aqnlbvlfkkhqewvdcehu.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxbmxidmxma2tocWV3dmRjZWh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzMDA4NTYsImV4cCI6MjA5ODg3Njg1Nn0.9Kw8ESBCDQGzqcg5lQnrl06DUr7-T7Ag8mmm2PzdWYI";
-
-const client = supabase.createClient(supabaseUrl, supabaseKey);
-
-
 let selectedDate = getSelectedDate();
 
 const [year, month, day] = selectedDate.split("-");
@@ -21,26 +15,6 @@ let statusGameWin = "false";
 let statusGameCompleted = "false";
 let statusCompletedSameDay = "false";
 
-window.playerGames = async function (date) {
-  const playerId = getPlayerId();
-  console.log(playerId);
-
-  if (!playerId) return null;
-
-  const { data, error } = await client
-    .from("playerGames")
-    .select("*")
-    .eq("playerId", playerId)
-    .eq("date", date)
-    .maybeSingle();
-
-  if (error) {
-    console.error(error);
-    return null;
-  }
-
-  return data;
-};
 
 
 async function loadPlayerGame() {
@@ -85,7 +59,7 @@ window.addPlayerGame = async function (
   const playerId = getPlayerId();
   if (!playerId) return null;
 
-  const { data, error } = await client
+  const { data, error } = await db
     .from("playerGames")
     .upsert({
         playerId,
@@ -122,7 +96,7 @@ window.updatePlayerGame = async function (
   const playerId = getPlayerId();
   if (!playerId) return null;
 
-  const { data, error } = await client
+  const { data, error } = await db
     .from("playerGames")
     .update({
       guesses,
@@ -148,7 +122,7 @@ window.updatePlayerGame = async function (
 window.insertData = async function () {
   const gameObj = getGameForDate(selectedDate);
 
-  const { error } = await client
+  const { error } = await db
     .from("games")
     .upsert([
       {
@@ -163,7 +137,7 @@ window.insertData = async function () {
 
 window.checkData = async function (getAll = false) {
 
-    let query = client.from("games").select("*");
+    let query = db.from("games").select("*");
 
     if (!getAll) {
         query = query.eq("date", selectedDate).maybeSingle();
@@ -401,93 +375,33 @@ function getEasternDayNumberFromDate(dateString) {
    LEADERBOARD
 ========================= */
 
-async function loadLeaderboard() {
-  let url =
-    `https://statsapi.mlb.com/api/v1/stats?` +
-    `stats=${gameInfoObj.stats}` +
-    `&group=${gameInfoObj.group}` +
-    `&sportId=1` +
-    `&sortStat=${gameInfoObj.sortStat}` +
-    `&order=desc` +
-    `&limit=1000`;
+async function loadLeaderboard(){
 
-  if (gameInfoObj.startDate) url += `&startDate=${gameInfoObj.startDate}`;
-  if (gameInfoObj.endDate) url += `&endDate=${gameInfoObj.endDate}`;
-  if (gameInfoObj.season) url += `&season=${gameInfoObj.season}`;
-  if (gameInfoObj.teamId) url += `&teamId=${gameInfoObj.teamId}`;
-  if (gameInfoObj.gameType) url += `&gameType=${gameInfoObj.gameType}`;
-  //if (GAME.stats === "byDateRange") url += `&playerPool=all`;
+  leaderboard =
+    await fetchLeaderboard(gameInfoObj);
 
-  url += "&playerPool=all";
 
-  console.log(url);
+  gameTitle.textContent =
+    gameInfoObj.title;
 
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`MLB API returned ${res.status}`);
-  }
-  const data = await res.json();
 
-  const leaders = data.stats?.[0]?.splits || [];
-
-  leaderboard = leaders.map((p, i) => ({
-    rank: i + 1,
-    name: p.player.fullName,
-    value: Number(p.stat[gameInfoObj.sortStat] || 0),
-    team: p.team?.name || "Unknown",
-    league: p.league?.abbreviation || "",
-    position: p.position.abbreviation || "N/A"
-  }));
-
-  gameTitle.textContent = gameInfoObj.title;
-  
   renderStatHeader();
 
   render();
 
-  lastGuess.innerHTML = "";
+  lastGuess.innerHTML="";
 
-  document.getElementById("guessNumber").textContent = guesses.length;
-  
-  if (leaderboard.length) checkWin();
+
+  document.getElementById(
+    "guessNumber"
+  ).textContent = guesses.length;
+
+
+  if(leaderboard.length)
+    checkWin();
+
 }
 
-
-
-/* =========================
-   SEARCH
-========================= */
-
-async function searchPlayers(query) {
-  const q = query.trim();
-
-  if (q.length < 2) {
-    matches = [];
-    renderDropdown();
-    return;
-  }
-
-  try {
-    const res = await fetch(
-      `https://statsapi.mlb.com/api/v1/people/search?names=${encodeURIComponent(q)}`
-    );
-
-    const data = await res.json();
-
-    matches = (data.people || [])
-      .map(p => ({
-        name: p.fullName,
-        id: p.id
-      }))
-      .slice(0, 8);
-
-  } catch {
-    matches = [];
-  }
-
-  activeIndex = -1;
-  renderDropdown();
-}
 
 
 
@@ -545,11 +459,6 @@ function renderDropdown() {
 
   dropdown.style.display = "block";
 }
-function getHeadshot(playerId) {
-  return `https://img.mlbstatic.com/mlb/images/players/head_shot/${playerId}.jpg`;
-}
-
-
 
 /* =========================
    GAME LOGIC
@@ -621,23 +530,6 @@ async function guessPlayer() {
   dropdown.style.display = "none";
   
   await saveGame();
-}
-
-async function validatePlayerName(name) {
-  const res = await fetch(
-    `https://statsapi.mlb.com/api/v1/people/search?names=${encodeURIComponent(name)}`
-  );
-
-  const data = await res.json();
-
-  const people = data.people || [];
-
-  // find exact match (case-insensitive)
-  const match = people.find(
-    p => p.fullName.toLowerCase() === name.toLowerCase()
-  );
-
-  return match || null;
 }
 
 async function checkWin() {
@@ -860,7 +752,7 @@ async function generateUniqueGame(dateString) {
 
   const baseSeed = Math.floor(Math.random() * 1000000000);
 
-  const { data, error } = await client
+  const { data, error } = await db
     .from("games")
     .select("gameinfo");
 
@@ -942,7 +834,9 @@ document.getElementById("testGameBtn").addEventListener("click", () => {
 
   const [year, month, day] = selectedDate.split("-").map(Number);
 
-  const base = new Date(year, month - 1, day);
+  const base = new Date(
+    `${selectedDate}T12:00:00`
+  );
 
   base.setDate(base.getDate() + 1);
 
@@ -1106,7 +1000,12 @@ document.addEventListener("click", (e) => {
 input.addEventListener("input", () => {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(() => {
-    searchPlayers(input.value);
+    searchPlayers(input.value)
+    .then(results=>{
+        matches = results;
+        activeIndex=-1;
+        renderDropdown();
+    });
   }, 150);
 });
 
@@ -1318,84 +1217,6 @@ function clearHintData() {
   hint.textContent = "";
 }
 
-async function updateGamesPlayed(playerId) {
-  // Get all games newest -> oldest
-  const { data: games, error: gamesError } = await client
-    .from("playerGames")
-    .select("*")
-    .eq("playerId", playerId)
-    .order("date", { ascending: false });
-
-  if (gamesError) {
-    console.error(gamesError);
-    return;
-  }
-
-  let gamesPlayed = games.length;
-  let wins = 0;
-  let streak = 0;
-
-  // Count ALL wins
-  for (const game of games) {
-    if (game.win === true || game.win === "true") {
-      wins++;
-    }
-  }
-
-  // Count current streak (newest -> oldest)
-  const today = new Date().toISOString().split("T")[0];
-
-  for (const game of games) {
-    const isWin = game.win === true || game.win === "true";
-    const isCompleted = game.completed === true || game.completed === "true";
-    const isGiveup = isCompleted && !isWin;
-
-    const completedSameDay =
-      game.completedSameDay === true || game.completedSameDay === "true";
-
-    const gameDate = game.date; // expected format: YYYY-MM-DD
-
-    // Giveups reset streak
-    if (isGiveup) {
-      break;
-    }
-
-    // Today's game:
-    // Count only if it is a win, otherwise skip it
-    if (gameDate === today) {
-      if (isWin && completedSameDay) {
-        streak++;
-      }
-      continue;
-    }
-
-    // Previous days count normally
-    if (isWin && completedSameDay) {
-      streak++;
-    } else {
-      break;
-    }
-  }
-
-  // Update playerData
-  const { error: updateError } = await client
-    .from("playerData")
-    .update({
-      gamesPlayed: String(gamesPlayed),
-      wins: String(wins),
-      streak: String(streak)
-    })
-    .eq("playerId", playerId);
-
-  if (updateError) {
-    console.error(updateError);
-    return;
-  }
-
-  console.log(
-    `Updated ${playerId}: ${gamesPlayed} games played, ${wins} wins, ${streak} streak`
-  );
-}
 
 /* =========================
    INIT
@@ -1406,7 +1227,7 @@ async function updateGamesPlayed(playerId) {
 
     console.log("Checking today's game...");
 
-    const { data: todaysGame, error } = await client
+    const { data: todaysGame, error } = await db
       .from("games")
       .select("gameinfo")
       .eq("date", selectedDate)
@@ -1427,7 +1248,7 @@ async function updateGamesPlayed(playerId) {
 
       const generatedGame = await generateUniqueGame(selectedDate);
 
-      const { error: insertError } = await client
+      const { error: insertError } = await db
         .from("games")
         .upsert(
           {
