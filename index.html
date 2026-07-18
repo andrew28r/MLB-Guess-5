@@ -3,48 +3,70 @@
 <head>
   <title>Daily Diamond 5</title>
 
+  <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3418526529996671"
      crossorigin="anonymous"></script>
 
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="css/style.css">
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/database.js"></script>
   <script src="js/api.js"></script>
   <script src="js/index.js" defer></script>
-  
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <meta name="google-adsense-account" content="ca-pub-3418526529996671">
+
 </head>
 
-<body>
-  
-<div class="top-bar">
 
+<body>
+
+<div class="top-bar">
 
   <div class="title"></div>
   <div class="title"></div>
 
   <button class="icon-btn" onclick="openPopup()">☰</button>
+
 </div>
+
+
 <div class="container">
+
   <h2>Daily Diamond 5</h2>
+
   <p id="streakDisplay">Current Streak: 0 🔥</p>
+
   <button id="playBtn">Play</button>
 
 </div>
 
+
+
 <div class="last5games">
+
   <h4>Last 5 Days</h4>
 
   <div id="dayButtons" class="day-buttons"></div>
-  <button id="calendarButton" title="View Calendar">Previous Games</button>
+
+  <button id="calendarButton" title="View Calendar">
+    Previous Games
+  </button>
+
 </div>
 
+
+
+
 <div id="playerIdPopup" class="popup" style="display:none;">
+
   <div class="popup-content">
 
     <h2 id="playerIdTitle">Login</h2>
@@ -54,8 +76,14 @@
     <button onclick="submitPlayerId()">Submit</button>
 
   </div>
+
 </div>
+
+
+
+
 <div id="loginConfirmPopup" class="popup" style="display:none;">
+
   <div class="popup-content">
 
     <h2>Account Found</h2>
@@ -63,46 +91,46 @@
     <p id="loginConfirmText"></p>
 
     <button id="loginYesBtn">Login</button>
+
     <button id="loginNoBtn">Cancel</button>
 
   </div>
+
 </div>
 
+
+
+
+
 <div class="leaderboard">
+
   <h3>Leaderboard</h3>
 
+
   <div class="leaderboard-header">
+
     <span></span>
+
     <span></span>
+
     <span>Wins</span>
+
   </div>
+
 
   <div id="leaderboardList">
     Loading...
   </div>
+
+
 </div>
 
-<div id="calendarPopup" class="popup hidden">
-    <div class="popup-content">
 
-        <div class="calendar-header">
 
-          <button class="icon-btn" id="prevMonth">❮</button>
 
-          <h2 id="calendarMonth"></h2>
-
-          <button class="icon-btn" id="nextMonth">❯</button>
-
-        </div>
-
-        <div id="calendarGrid"></div>
-
-        <button id="closeCalendar">Close</button>
-
-    </div>
-</div>
 
 <!-- Google Ad -->
+
 <div class="ad-container">
 
   <ins class="adsbygoogle"
@@ -114,13 +142,66 @@
 
 </div>
 
+
 <script>
   (adsbygoogle = window.adsbygoogle || []).push({});
 </script>
 
+
+
+
+
+
+<div id="calendarPopup" class="popup hidden">
+
+    <div class="popup-content">
+
+
+        <div class="calendar-header">
+
+
+          <button class="icon-btn" id="prevMonth">
+            ❮
+          </button>
+
+
+          <h2 id="calendarMonth"></h2>
+
+
+          <button class="icon-btn" id="nextMonth">
+            ❯
+          </button>
+
+
+        </div>
+
+
+
+        <div id="calendarGrid"></div>
+
+
+        <button id="closeCalendar">
+          Close
+        </button>
+
+
+
+    </div>
+
+</div>
+
+
+
+
+
 <footer class="footer">
-  <p>version alpha 3.6 |  last updated 07/18/2026</p>
+
+  <p>
+    version alpha 3.6 | last updated 07/18/2026
+  </p>
+
 </footer>
+
 
 </body>
 </html>
