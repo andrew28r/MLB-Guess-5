@@ -781,15 +781,15 @@ button:focus-visible {
 
   width:256px;
 
-  padding:4px 8px;
+  padding:6px 8px;
 
-  font-size:12px;
+  font-size:13px;
 
   border-radius:6px;
 
-  min-height:0;
+  min-height:32px;
 
-  height:28px;
+  height:32px;
 
   display:block;
 
@@ -798,7 +798,6 @@ button:focus-visible {
   margin-right:auto;
 
 }
-
 
 .day-btn.completed,
 .calendarDay.completed {
@@ -1273,3 +1272,4 @@ button:focus-visible {
 #leaderboardList .name {
     text-align:left;
 }
+
