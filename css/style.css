@@ -1273,3 +1273,9 @@ button:focus-visible {
     text-align:left;
 }
 
+.ad-container {
+    width: 100%;
+    max-width: 728px;
+    margin: 25px auto;
+    text-align: center;
+}
