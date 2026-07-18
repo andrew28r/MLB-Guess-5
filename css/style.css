@@ -983,7 +983,11 @@ button:focus-visible {
 
   width:45px;
 }
+.stat-header {
 
+    margin-top:35px;
+
+}
 
 /* Leaderboard popup */
 
@@ -1257,4 +1261,15 @@ button:focus-visible {
 .calendar-header h2 {
     margin:0;
     font-size:18px;
+}
+
+/* Popup leaderboard rows */
+#leaderboardList .row {
+    display:flex;
+    justify-content:space-between;
+    text-align:left;
+}
+
+#leaderboardList .name {
+    text-align:left;
 }
