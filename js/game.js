@@ -15,6 +15,10 @@ let statusGameWin = "false";
 let statusGameCompleted = "false";
 let statusCompletedSameDay = "false";
 
+const today = getEasternDateString();
+if (selectedDate > today) {
+    window.location.href = "index.html";
+}
 
 
 async function loadPlayerGame() {

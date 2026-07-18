@@ -35,6 +35,7 @@
   <h4>Last 5 Days</h4>
 
   <div id="dayButtons" class="day-buttons"></div>
+  <button id="calendarButton" title="View Calendar">Previous Games</button>
 </div>
 
 <div id="playerIdPopup" class="popup" style="display:none;">
@@ -75,6 +76,25 @@
   </div>
 </div>
 
+<div id="calendarPopup" class="popup hidden">
+    <div class="popup-content">
+
+        <div class="calendar-header">
+
+          <button class="icon-btn" id="prevMonth">❮</button>
+
+          <h2 id="calendarMonth"></h2>
+
+          <button class="icon-btn" id="nextMonth">❯</button>
+
+        </div>
+
+        <div id="calendarGrid"></div>
+
+        <button id="closeCalendar">Close</button>
+
+    </div>
+</div>
 
 <footer class="footer">
   <p>version alpha 3.5 |  last updated 07/16/2026</p>

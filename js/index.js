@@ -328,6 +328,302 @@ async function loadLeaderboard() {
   });
 }
 
+const calendarButton = document.getElementById("calendarButton");
+const calendarPopup = document.getElementById("calendarPopup");
+const closeCalendar = document.getElementById("closeCalendar");
+
+
+closeCalendar.addEventListener("click", () => {
+    calendarPopup.style.display = "none";
+});
+calendarPopup.addEventListener("click", (e) => {
+
+    // Only close if clicking the dark overlay, not the calendar box
+    if (e.target === calendarPopup) {
+        calendarPopup.style.display = "none";
+    }
+
+});
+
+calendarButton.addEventListener("click", async () => {
+    calendarPopup.style.display = "flex";
+    setCurrentCalendarMonth();
+    await loadCalendar();
+});
+
+let calendarYear;
+let calendarMonth;
+
+function setCurrentCalendarMonth() {
+
+    const today = new Date(
+        new Date().toLocaleString("en-US", {
+            timeZone:"America/New_York"
+        })
+    );
+
+    calendarYear = today.getFullYear();
+    calendarMonth = today.getMonth();
+
+}
+const minCalendarYear = 2026;
+const minCalendarMonth = 6; // July
+
+async function loadCalendar() {
+
+    const grid = document.getElementById("calendarGrid");
+
+    grid.innerHTML = "";
+
+
+    const year = calendarYear;
+    const month = calendarMonth;
+
+
+    document.getElementById("calendarMonth").textContent =
+        new Date(year, month).toLocaleString("default", {
+            month: "long",
+            year: "numeric"
+        });
+
+
+    // Day headers
+    const headers = [
+        "Sun",
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat"
+    ];
+
+
+    headers.forEach(day => {
+
+        const header = document.createElement("div");
+
+        header.className = "calendar-header-day";
+
+        header.textContent = day;
+
+        grid.appendChild(header);
+
+    });
+
+
+
+    // Empty spaces before first day
+    const firstDay = new Date(year, month, 1).getDay();
+
+
+    for (let i = 0; i < firstDay; i++) {
+
+        grid.appendChild(document.createElement("div"));
+
+    }
+
+
+
+    const playerId = localStorage.getItem("playerId");
+
+
+    const { data: games, error } = await db
+        .from("playerGames")
+        .select("*")
+        .eq("playerId", playerId);
+
+
+    if (error) {
+
+        console.error(error);
+
+        return;
+
+    }
+
+
+
+    const today = new Date(
+        new Date().toLocaleString("en-US", {
+            timeZone:"America/New_York"
+        })
+    );
+
+
+
+    // Days in month
+    const daysInMonth = new Date(
+        year,
+        month + 1,
+        0
+    ).getDate();
+
+
+
+    for (let day = 1; day <= daysInMonth; day++) {
+
+
+        const square = document.createElement("div");
+
+        square.className = "calendarDay";
+
+        square.textContent = day;
+
+
+
+        const monthNumber = String(month + 1).padStart(2, "0");
+
+        const dayNumber = String(day).padStart(2, "0");
+
+
+        const dateString =
+            `${year}-${monthNumber}-${dayNumber}`;
+
+
+        square.dataset.date = dateString;
+
+
+
+        const calendarDate =
+            new Date(dateString + "T00:00:00");
+
+
+
+        const game =
+            games.find(g => g.date === dateString);
+
+
+
+        // Future game
+        if (calendarDate > today) {
+
+            square.classList.add("future");
+
+        }
+
+
+        // Won
+        else if (game && game.win === "true") {
+
+            square.classList.add("completed");
+
+        }
+
+
+        // Failed
+        else if (game && game.completed === "true") {
+
+            square.classList.add("failed");
+
+        }
+
+
+        // Started but unfinished
+        else if (game) {
+
+            square.classList.add("incomplete");
+
+        }
+
+
+        // Available past game
+        else {
+
+            square.classList.add("notStarted");
+
+        }
+
+
+
+        // Open game when clicked
+        square.addEventListener("click", () => {
+
+
+            if (calendarDate > today) {
+
+                return;
+
+            }
+
+
+            window.location.href =
+                `game.html?date=${dateString}`;
+
+
+        });
+
+
+
+        grid.appendChild(square);
+
+    }
+
+}
+
+
+
+
+
+const prevMonth =
+    document.getElementById("prevMonth");
+
+
+const nextMonth =
+    document.getElementById("nextMonth");
+
+
+
+prevMonth.addEventListener("click", async () => {
+
+    calendarMonth--;
+
+    if (calendarMonth < 0) {
+        calendarMonth = 11;
+        calendarYear--;
+    }
+
+
+    // Stop going before July 2026
+    if (
+        calendarYear < minCalendarYear ||
+        (calendarYear === minCalendarYear && calendarMonth < minCalendarMonth)
+    ) {
+
+        calendarYear = minCalendarYear;
+        calendarMonth = minCalendarMonth;
+
+        return;
+    }
+
+
+    await loadCalendar();
+
+});
+
+
+
+
+
+nextMonth.addEventListener("click", async () => {
+
+
+    calendarMonth++;
+
+
+    if (calendarMonth > 11) {
+
+        calendarMonth = 0;
+
+        calendarYear++;
+
+    }
+
+
+    await loadCalendar();
+
+
+});
 
 
 window.addEventListener("load", async () => {

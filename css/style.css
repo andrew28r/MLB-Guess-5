@@ -775,8 +775,33 @@ button:focus-visible {
   border:1px solid #ccc;
 }
 
+#calendarButton {
 
-.day-btn.completed {
+  margin-top:12px;
+
+  width:256px;
+
+  padding:4px 8px;
+
+  font-size:12px;
+
+  border-radius:6px;
+
+  min-height:0;
+
+  height:28px;
+
+  display:block;
+
+  margin-left:auto;
+
+  margin-right:auto;
+
+}
+
+
+.day-btn.completed,
+.calendarDay.completed {
 
   background:#4caf50;
 
@@ -786,7 +811,8 @@ button:focus-visible {
 }
 
 
-.day-btn.notStarted {
+.day-btn.notStarted,
+.calendarDay.notStarted {
 
   background:#ddd;
 
@@ -796,7 +822,8 @@ button:focus-visible {
 }
 
 
-.day-btn.failed {
+.day-btn.failed,
+.calendarDay.failed {
 
   background:#af4c4c;
 
@@ -806,13 +833,22 @@ button:focus-visible {
 }
 
 
-.day-btn.incomplete {
+.day-btn.incomplete,
+.calendarDay.incomplete {
 
   background:#c7a74e;
 
   color:white;
 
   border-color:#c7a74e;
+}
+
+.calendarDay.future {
+    background:#636363;
+
+    color:#878686;
+
+    border-color:#636363;
 }
 
 
@@ -1093,4 +1129,132 @@ button:focus-visible {
     padding:8px;
   }
 
+}
+
+#calendarGrid {
+    display:grid;
+    grid-template-columns:repeat(7, minmax(0, 1fr));
+    gap:5px;
+
+    width:100%;
+    max-width:340px;
+    margin:10px auto 0;
+}
+.calendarDay {
+    width:100%;
+    aspect-ratio:1 / 1;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    border-radius:8px;
+
+    font-weight:bold;
+    cursor:pointer;
+
+    font-size:14px;
+}
+
+/* =====================================================
+   Calendar Popup
+===================================================== */
+
+
+.calendar-header {
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:15px;
+
+}
+
+
+.calendar-header h2 {
+
+    margin:0;
+
+    font-size:18px;
+
+    font-weight:700;
+
+    color:#333;
+
+}
+
+
+/* Previous / Next month buttons */
+
+#prevMonth,
+#nextMonth {
+
+    width:36px;
+
+    height:36px;
+
+    min-height:36px;
+
+    padding:0;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-size:16px;
+
+    border-radius:50%;
+
+}
+
+
+/* Calendar grid */
+
+#calendarGrid {
+
+    margin-top:10px;
+
+}
+
+
+/* Bottom close button */
+
+#closeCalendar {
+
+    display:block;
+
+    width:100%;
+
+    max-width:220px;
+
+    margin:18px auto 0;
+
+    padding:8px 12px;
+
+    font-size:14px;
+
+    min-height:38px;
+
+    border-radius:8px;
+
+}
+
+.calendar-header {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    width:100%;
+    margin-bottom:15px;
+}
+
+
+.calendar-header h2 {
+    margin:0;
+    font-size:18px;
 }
